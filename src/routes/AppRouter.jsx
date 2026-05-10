@@ -1,21 +1,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import CoursesPage from "../pages/Courses/CoursesPage";
 
 // Layouts
-import MainLayout      from "../layouts/MainLayout";
+import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 // Pages — Landing
 import LandingPage from "../pages/Landing/LandingPage";
 
 // Pages — Auth
-import LoginPage          from "../pages/Auth/LoginPage";
-import SignupPage         from "../pages/Auth/SignupPage";
+import LoginPage from "../pages/Auth/LoginPage";
+import SignupPage from "../pages/Auth/SignupPage";
 import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
-import ResetPasswordPage  from "../pages/Auth/ResetPasswordPage";
+import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
 
 // Pages — Dashboard
 import DashboardPage from "../pages/Dashboard/DashboardPage";
+import RoadmapPage from "../pages/Roadmap/RoadmapPage";
 
 // Placeholder (we'll fill these in later steps)
 const ComingSoon = ({ title }) => (
@@ -48,23 +50,23 @@ const AppRouter = () => (
       </Route>
 
       {/* ── Auth Pages ── */}
-      <Route path="/login"           element={<PublicRoute><LoginPage /></PublicRoute>} />
-      <Route path="/signup"          element={<PublicRoute><SignupPage /></PublicRoute>} />
+      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+      <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
       <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
-      <Route path="/reset-password"  element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
+      <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
 
       {/* ── Protected Dashboard ── */}
       <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-        <Route path="/dashboard"         element={<DashboardPage />} />
-        <Route path="/roadmap"           element={<ComingSoon title="Career Roadmap" />} />
-        <Route path="/courses"           element={<ComingSoon title="Courses" />} />
-        <Route path="/notes"             element={<ComingSoon title="Notes" />} />
-        <Route path="/coding-tracker"    element={<ComingSoon title="Coding Tracker" />} />
-        <Route path="/interview-prep"    element={<ComingSoon title="Interview Prep" />} />
-        <Route path="/mock-interview"    element={<ComingSoon title="Mock Interview" />} />
-        <Route path="/ai-mentor"         element={<ComingSoon title="AI Mentor" />} />
-        <Route path="/question-generator"element={<ComingSoon title="Question Generator" />} />
-        <Route path="/resume-review"     element={<ComingSoon title="Resume Review" />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/roadmap" element={<RoadmapPage />} />
+        <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/notes" element={<ComingSoon title="Notes" />} />
+        <Route path="/coding-tracker" element={<ComingSoon title="Coding Tracker" />} />
+        <Route path="/interview-prep" element={<ComingSoon title="Interview Prep" />} />
+        <Route path="/mock-interview" element={<ComingSoon title="Mock Interview" />} />
+        <Route path="/ai-mentor" element={<ComingSoon title="AI Mentor" />} />
+        <Route path="/question-generator" element={<ComingSoon title="Question Generator" />} />
+        <Route path="/resume-review" element={<ComingSoon title="Resume Review" />} />
       </Route>
 
       {/* ── 404 Fallback ── */}
