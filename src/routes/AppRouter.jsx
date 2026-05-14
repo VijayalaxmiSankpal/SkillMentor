@@ -8,6 +8,7 @@ import InterviewPrepPage from "../pages/InterviewPrep/InterviewPrepPage";
 import MockInterviewPage from "../pages/MockInterview/MockInterviewPage";
 import AIMentorPage from "../pages/AIMentor/AIMentorPage";
 import QuestionGeneratorPage from "../pages/QuestionGenerator/QuestionGeneratorPage";
+import ResumeReviewPage from "../pages/ResumeReview/ResumeReviewPage";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -102,7 +103,7 @@ function AppRouter() {
           <Route path="/mock-interview" element={<MockInterviewPage />} />
           <Route path="/ai-mentor" element={<AIMentorPage />} />
           <Route path="/question-generator" element={<QuestionGeneratorPage />} />
-          <Route path="/resume-review" element={<ComingSoon title="Resume Review" />} />
+          <Route path="/resume-review" element={<ResumeReviewPage />} />
         </Route>
 
         {/* ── 404 Fallback ── */}
