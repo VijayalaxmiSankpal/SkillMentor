@@ -4,6 +4,7 @@ import CoursesPage from "../pages/Courses/CoursesPage";
 import NotesPage from "../pages/Notes/NotesPage";
 import CodingTrackerPage from "../pages/CodingTracker/CodingTrackerPage";
 import InterviewPrepPage from "../pages/InterviewPrep/InterviewPrepPage";
+import MockInterviewPage from "../pages/MockInterview/MockInterviewPage";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -66,7 +67,7 @@ const AppRouter = () => (
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/coding-tracker" element={<CodingTrackerPage />} />
         <Route path="/interview-prep" element={<InterviewPrepPage />} />
-        <Route path="/mock-interview" element={<ComingSoon title="Mock Interview" />} />
+        <Route path="/mock-interview" element={<MockInterviewPage />} />
         <Route path="/ai-mentor" element={<ComingSoon title="AI Mentor" />} />
         <Route path="/question-generator" element={<ComingSoon title="Question Generator" />} />
         <Route path="/resume-review" element={<ComingSoon title="Resume Review" />} />
