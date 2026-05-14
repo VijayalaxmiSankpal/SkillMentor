@@ -9,6 +9,7 @@ import MockInterviewPage from "../pages/MockInterview/MockInterviewPage";
 import AIMentorPage from "../pages/AIMentor/AIMentorPage";
 import QuestionGeneratorPage from "../pages/QuestionGenerator/QuestionGeneratorPage";
 import ResumeReviewPage from "../pages/ResumeReview/ResumeReviewPage";
+import NotFoundPage from "../components/shared/errors/NotFoundPage";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -107,7 +108,7 @@ function AppRouter() {
         </Route>
 
         {/* ── 404 Fallback ── */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
