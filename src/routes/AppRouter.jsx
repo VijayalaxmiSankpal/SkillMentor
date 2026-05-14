@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import CoursesPage from "../pages/Courses/CoursesPage";
 import NotesPage from "../pages/Notes/NotesPage";
+import CodingTrackerPage from "../pages/CodingTracker/CodingTrackerPage";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -62,7 +63,7 @@ const AppRouter = () => (
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/notes" element={<NotesPage />} />
-        <Route path="/coding-tracker" element={<ComingSoon title="Coding Tracker" />} />
+        <Route path="/coding-tracker" element={<CodingTrackerPage />} />
         <Route path="/interview-prep" element={<ComingSoon title="Interview Prep" />} />
         <Route path="/mock-interview" element={<ComingSoon title="Mock Interview" />} />
         <Route path="/ai-mentor" element={<ComingSoon title="AI Mentor" />} />
