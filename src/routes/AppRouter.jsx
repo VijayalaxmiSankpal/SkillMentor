@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import CoursesPage from "../pages/Courses/CoursesPage";
 import NotesPage from "../pages/Notes/NotesPage";
 import CodingTrackerPage from "../pages/CodingTracker/CodingTrackerPage";
+import InterviewPrepPage from "../pages/InterviewPrep/InterviewPrepPage";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -64,7 +65,7 @@ const AppRouter = () => (
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/coding-tracker" element={<CodingTrackerPage />} />
-        <Route path="/interview-prep" element={<ComingSoon title="Interview Prep" />} />
+        <Route path="/interview-prep" element={<InterviewPrepPage />} />
         <Route path="/mock-interview" element={<ComingSoon title="Mock Interview" />} />
         <Route path="/ai-mentor" element={<ComingSoon title="AI Mentor" />} />
         <Route path="/question-generator" element={<ComingSoon title="Question Generator" />} />
