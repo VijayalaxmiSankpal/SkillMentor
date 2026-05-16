@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 /* eslint-disable no-unused-vars */
-=======
->>>>>>> feat/notes-ui
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -15,37 +12,19 @@ import QuestionGeneratorPage from "../pages/QuestionGenerator/QuestionGeneratorP
 import ResumeReviewPage from "../pages/ResumeReview/ResumeReviewPage";
 import NotFoundPage from "../components/shared/errors/NotFoundPage";
 
-// Layouts
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
-// Pages — Landing
 import LandingPage from "../pages/Landing/LandingPage";
 
-// Pages — Auth
 import LoginPage from "../pages/Auth/LoginPage";
 import SignupPage from "../pages/Auth/SignupPage";
 import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
 
-// Pages — Dashboard
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import RoadmapPage from "../pages/Roadmap/RoadmapPage";
 
-<<<<<<< HEAD
-=======
-// Placeholder
-function ComingSoon(props) {
-  const title = props.title;
-  return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <p className="text-slate-400 font-display text-2xl">{title} — Coming Soon</p>
-    </div>
-  );
-}
-
->>>>>>> feat/notes-ui
-// ── Protected Route Guard ─────────────────────
 function ProtectedRoute(props) {
   const children = props.children;
   const auth = useAuth();
@@ -67,7 +46,6 @@ function ProtectedRoute(props) {
   return <Navigate to="/login" replace />;
 }
 
-// ── Public Route Guard ──────────────────────────
 function PublicRoute(props) {
   const children = props.children;
   const auth = useAuth();
@@ -89,18 +67,15 @@ function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ── Public / Landing ── */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
         </Route>
 
-        {/* ── Auth Pages ── */}
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
         <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
 
-        {/* ── Protected Dashboard ── */}
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
@@ -114,7 +89,6 @@ function AppRouter() {
           <Route path="/resume-review" element={<ResumeReviewPage />} />
         </Route>
 
-        {/* ── 404 Fallback ── */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
