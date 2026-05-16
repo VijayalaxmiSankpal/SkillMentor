@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Dependencies
 node_modules/
 package-lock.json.bak
@@ -12,10 +11,21 @@ package-lock.json.bak
 logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Uploads (user-uploaded files)
+# Uploads
 src/uploads/*
 !src/uploads/.gitkeep
+
+# Build
+dist/
+build/
+dist-ssr/
+
+# Coverage
+coverage/
 
 # OS
 .DS_Store
@@ -25,39 +35,7 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
-
-# Build
-dist/
-build/
-
-# Test coverage
-coverage/
-=======
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
-
-.env
-.env.local
->>>>>>> cf69a1bf4cb27b4f90828eaaf80f5bc5c4ff42a2
