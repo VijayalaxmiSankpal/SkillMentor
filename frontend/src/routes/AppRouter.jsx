@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 /* eslint-disable no-unused-vars */
+=======
+>>>>>>> feat/notes-ui
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -29,6 +32,19 @@ import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import RoadmapPage from "../pages/Roadmap/RoadmapPage";
 
+<<<<<<< HEAD
+=======
+// Placeholder
+function ComingSoon(props) {
+  const title = props.title;
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <p className="text-slate-400 font-display text-2xl">{title} — Coming Soon</p>
+    </div>
+  );
+}
+
+>>>>>>> feat/notes-ui
 // ── Protected Route Guard ─────────────────────
 function ProtectedRoute(props) {
   const children = props.children;
