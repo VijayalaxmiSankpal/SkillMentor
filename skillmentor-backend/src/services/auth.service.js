@@ -143,9 +143,9 @@ const login = async ({ email, password, userAgent = '' }) => {
     throw ApiError.unauthorized(MESSAGES.AUTH.INVALID_CREDENTIALS);
   }
 
-  if (!user.isEmailVerified) {
-    throw ApiError.forbidden(MESSAGES.AUTH.EMAIL_NOT_VERIFIED);
-  }
+  // if (!user.isEmailVerified) {
+  //   throw ApiError.forbidden(MESSAGES.AUTH.EMAIL_NOT_VERIFIED);
+  // }
 
   const { accessToken, refreshToken } = buildTokens(user);
 

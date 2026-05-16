@@ -7,7 +7,7 @@ const authService = {
   },
 
   register: async (name, email, password) => {
-    const response = await axiosInstance.post("/auth/register", { name, email, password });
+    const response = await axiosInstance.post("/auth/signup", { name, email, password });
     return response.data;
   },
 

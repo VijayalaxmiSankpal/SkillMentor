@@ -1,54 +1,88 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import axiosInstance from "../services/axios";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]       = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem("skillmentor_user");
-    const token  = localStorage.getItem("skillmentor_token");
-    if (stored && token) {
-      try { setUser(JSON.parse(stored)); }
-      catch { clearAuth(); }
-    }
-    setLoading(false);
-  }, []);
-
-  const clearAuth = () => {
+  const clearAuth = useCallback(() => {
     localStorage.removeItem("skillmentor_token");
     localStorage.removeItem("skillmentor_user");
     setUser(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("skillmentor_user");
+    const token = localStorage.getItem("skillmentor_token");
+
+    if (storedUser && token) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        clearAuth();
+      }
+    }
+
+    setLoading(false);
+  }, [clearAuth]);
 
   const login = useCallback(async (email, password) => {
-    const { data } = await axiosInstance.post("/auth/login", { email, password });
-    localStorage.setItem("skillmentor_token", data.token);
-    localStorage.setItem("skillmentor_user",  JSON.stringify(data.user));
-    setUser(data.user);
-    return data;
+    const response = await axiosInstance.post("/auth/login", {
+      email,
+      password,
+    });
+
+    const payload = response.data?.data;
+
+    const loggedInUser = payload?.user;
+    const accessToken = payload?.accessToken;
+
+    if (!loggedInUser || !accessToken) {
+      throw new Error("Invalid login response from server");
+    }
+
+    localStorage.setItem("skillmentor_token", accessToken);
+    localStorage.setItem("skillmentor_user", JSON.stringify(loggedInUser));
+
+    setUser(loggedInUser);
+
+    return payload;
   }, []);
 
   const signup = useCallback(async (formData) => {
-    const { data } = await axiosInstance.post("/auth/register", formData);
-    return data;
+    const response = await axiosInstance.post("/auth/signup", formData);
+    return response.data;
   }, []);
 
   const logout = useCallback(() => {
     clearAuth();
     window.location.href = "/login";
-  }, []);
+  }, [clearAuth]);
 
-  const updateUser = useCallback((updated) => {
-    setUser(updated);
-    localStorage.setItem("skillmentor_user", JSON.stringify(updated));
+  const updateUser = useCallback((updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem("skillmentor_user", JSON.stringify(updatedUser));
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        signup,
+        logout,
+        updateUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -56,7 +90,11 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+
+  if (!ctx) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
   return ctx;
 };
 
