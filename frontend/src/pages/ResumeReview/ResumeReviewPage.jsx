@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaUpload,
   FaFilePdf,
@@ -14,160 +14,69 @@ import ImprovementCard from "./components/ImprovementCard";
 import SectionAnalysis from "./components/SectionAnalysis";
 import KeywordMatch from "./components/KeywordMatch";
 import ResumeHistory from "./components/ResumeHistory";
-
-const PAGE_TITLE = "AI Resume Review";
-const PAGE_SUBTITLE =
-  "Upload your resume and get AI-powered feedback, ATS scoring, and improvement suggestions";
+import resumeService from "../../services/resumeService";
 
 const TAB_UPLOAD = "upload";
 const TAB_RESULT = "result";
 const TAB_HISTORY = "history";
 
-const MOCK_REVIEW_RESULT = {
-  atsScore: 72,
-  overallFeedback:
-    "Your resume has a solid foundation but needs optimization for ATS systems and stronger action verbs. The structure is clean but some sections lack quantifiable achievements.",
-  sections: [
-    {
-      name: "Contact Information",
-      score: 95,
-      status: "good",
-      feedback: "Complete and well-formatted. Email and phone are clear.",
-    },
-    {
-      name: "Professional Summary",
-      score: 60,
-      status: "warning",
-      feedback:
-        "Too generic. Tailor it to the specific role you're applying for. Include years of experience and key specializations.",
-    },
-    {
-      name: "Work Experience",
-      score: 65,
-      status: "warning",
-      feedback:
-        "Good structure but lacks metrics. Use STAR method and quantify achievements (%, $, time saved).",
-    },
-    {
-      name: "Skills",
-      score: 80,
-      status: "good",
-      feedback:
-        "Good technical coverage. Consider grouping by category (Frontend, Backend, Tools, Cloud).",
-    },
-    {
-      name: "Education",
-      score: 90,
-      status: "good",
-      feedback:
-        "Clear and concise. Add relevant coursework or certifications if applicable.",
-    },
-    {
-      name: "Projects",
-      score: 55,
-      status: "error",
-      feedback:
-        "Missing or too brief. Add 2-3 strong projects with tech stack, your role, and measurable impact.",
-    },
-  ],
+const formatReview = (review) => ({
+  id: review._id,
+  fileName: review.fileName,
+  atsScore: review.atsScore || 0,
+  reviewedAt: review.createdAt,
+  status: review.status,
+  overallFeedback: review.feedback?.summary || "",
+  sections: [],
   keywords: {
-    matched: [
-      "React",
-      "JavaScript",
-      "Node.js",
-      "Git",
-      "REST API",
-      "Agile",
-      "SQL",
-      "HTML/CSS",
-    ],
-    missing: [
-      "TypeScript",
-      "Docker",
-      "AWS",
-      "CI/CD",
-      "Microservices",
-      "GraphQL",
-      "Jest",
-      "Redux",
-    ],
-    score: 62,
+    matched: [],
+    missing: review.feedback?.missingKeywords || [],
+    score: review.atsScore || 0,
   },
   improvements: [
     {
-      category: "Action Verbs",
-      priority: "high",
-      suggestions: [
-        "Replace 'Responsible for' with 'Led', 'Built', 'Architected'",
-        "Use 'Optimized' instead of 'Made better'",
-        "Start bullets with strong verbs: Implemented, Designed, Deployed",
-      ],
-    },
-    {
-      category: "Quantifiable Results",
-      priority: "high",
-      suggestions: [
-        "Add metrics: 'Reduced load time by 40%'",
-        "Include team size: 'Led team of 5 developers'",
-        "Show scale: 'Handled 10K+ daily active users'",
-      ],
-    },
-    {
-      category: "ATS Optimization",
-      priority: "medium",
-      suggestions: [
-        "Use standard section headings: Experience, Education, Skills",
-        "Avoid tables, columns, and graphics",
-        "Include keywords from job description",
-        "Use .docx or plain PDF format",
-      ],
-    },
-    {
-      category: "Formatting",
+      category: "Strengths",
       priority: "low",
-      suggestions: [
-        "Keep to 1 page for <5 years experience",
-        "Use consistent date format",
-        "Ensure readable font size (10-12pt)",
-        "Add white space between sections",
-      ],
+      suggestions: review.feedback?.strengths || [],
+    },
+    {
+      category: "Weaknesses",
+      priority: "high",
+      suggestions: review.feedback?.weaknesses || [],
+    },
+    {
+      category: "Suggestions",
+      priority: "medium",
+      suggestions: review.feedback?.suggestions || [],
     },
   ],
-  fileName: "John_Doe_Resume.pdf",
-  reviewedAt: "2025-05-14T12:00:00",
-};
-
-const INITIAL_HISTORY = [
-  {
-    id: 1,
-    fileName: "John_Doe_Resume_v1.pdf",
-    atsScore: 72,
-    reviewedAt: "2025-05-14T12:00:00",
-    status: "completed",
-  },
-  {
-    id: 2,
-    fileName: "John_Doe_Resume_v2.pdf",
-    atsScore: 85,
-    reviewedAt: "2025-05-10T15:30:00",
-    status: "completed",
-  },
-];
+});
 
 function ResumeReviewPage() {
   const [activeTab, setActiveTab] = useState(TAB_UPLOAD);
-  const [uploadedFile, setUploadedFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [reviewResult, setReviewResult] = useState(null);
-  const [history, setHistory] = useState(INITIAL_HISTORY);
+  const [history, setHistory] = useState([]);
 
-  function handleTabChange(tab) {
-    return function () {
-      setActiveTab(tab);
-    };
-  }
+  const loadHistory = async () => {
+    try {
+      const response = await resumeService.getReviews();
+      const items = response.data?.items || [];
+      setHistory(items.map(formatReview));
+    } catch (error) {
+      console.error("Failed to load resume history:", error);
+    }
+  };
 
-  function handleFileUpload(file) {
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const handleTabChange = (tab) => () => {
+    setActiveTab(tab);
+  };
+
+  const handleFileUpload = async (file) => {
     if (!file) return;
 
     if (file.type !== "application/pdf") {
@@ -180,66 +89,55 @@ function ResumeReviewPage() {
       return;
     }
 
-    setUploadedFile(file);
     setIsAnalyzing(true);
     setActiveTab(TAB_RESULT);
 
-    setTimeout(function () {
-      const result = {
-        ...MOCK_REVIEW_RESULT,
-        fileName: file.name,
-        reviewedAt: new Date().toISOString(),
-      };
+    try {
+      const response = await resumeService.uploadResume(
+        file,
+        "Frontend Developer"
+      );
 
-      setReviewResult(result);
-      setIsAnalyzing(false);
+      const review = response.data?.review;
+      const formatted = formatReview(review);
 
-      setHistory(function (prev) {
-        return [
-          {
-            id: Date.now(),
-            fileName: file.name,
-            atsScore: result.atsScore,
-            reviewedAt: result.reviewedAt,
-            status: "completed",
-          },
-          ...prev,
-        ];
-      });
-
+      setReviewResult(formatted);
       toast.success("Resume analysis complete!");
-    }, 3000);
-  }
+      await loadHistory();
+    } catch (error) {
+      console.error("Resume upload failed:", error);
+      toast.error(error?.response?.data?.message || "Resume analysis failed");
+      setActiveTab(TAB_UPLOAD);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
-  function handleReanalyze() {
-    setUploadedFile(null);
+  const handleReanalyze = () => {
     setReviewResult(null);
     setActiveTab(TAB_UPLOAD);
-  }
+  };
 
-  function handleDeleteHistory(id) {
-    setHistory(function (prev) {
-      return prev.filter(function (h) {
-        return h.id !== id;
-      });
-    });
+  const handleDeleteHistory = async (id) => {
+    try {
+      await resumeService.deleteReview(id);
+      toast.success("Removed from history");
+      await loadHistory();
 
-    toast.success("Removed from history");
-  }
+      if (reviewResult?.id === id) {
+        setReviewResult(null);
+        setActiveTab(TAB_UPLOAD);
+      }
+    } catch (error) {
+      console.error("Delete resume review failed:", error);
+      toast.error("Failed to delete resume review");
+    }
+  };
 
-  function handleViewHistory(item) {
-    return function () {
-      const mockResult = {
-        ...MOCK_REVIEW_RESULT,
-        fileName: item.fileName,
-        reviewedAt: item.reviewedAt,
-        atsScore: item.atsScore,
-      };
-
-      setReviewResult(mockResult);
-      setActiveTab(TAB_RESULT);
-    };
-  }
+  const handleViewHistory = (item) => () => {
+    setReviewResult(item);
+    setActiveTab(TAB_RESULT);
+  };
 
   const tabBase =
     "px-5 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 border";
@@ -253,9 +151,12 @@ function ResumeReviewPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-display font-bold text-white mb-1">
-              {PAGE_TITLE}
+              AI Resume Review
             </h1>
-            <p className="text-gray-400 text-sm">{PAGE_SUBTITLE}</p>
+            <p className="text-gray-400 text-sm">
+              Upload your resume and get AI-powered feedback, ATS scoring, and
+              improvement suggestions
+            </p>
           </div>
         </div>
 
@@ -263,7 +164,9 @@ function ResumeReviewPage() {
           <button
             onClick={handleTabChange(TAB_UPLOAD)}
             className={
-              tabBase + " " + (activeTab === TAB_UPLOAD ? tabActive : tabInactive)
+              tabBase +
+              " " +
+              (activeTab === TAB_UPLOAD ? tabActive : tabInactive)
             }
           >
             <FaUpload size={14} />
@@ -273,7 +176,9 @@ function ResumeReviewPage() {
           <button
             onClick={handleTabChange(TAB_RESULT)}
             className={
-              tabBase + " " + (activeTab === TAB_RESULT ? tabActive : tabInactive)
+              tabBase +
+              " " +
+              (activeTab === TAB_RESULT ? tabActive : tabInactive)
             }
           >
             <FaCheckCircle size={14} />
@@ -283,7 +188,9 @@ function ResumeReviewPage() {
           <button
             onClick={handleTabChange(TAB_HISTORY)}
             className={
-              tabBase + " " + (activeTab === TAB_HISTORY ? tabActive : tabInactive)
+              tabBase +
+              " " +
+              (activeTab === TAB_HISTORY ? tabActive : tabInactive)
             }
           >
             <FaHistory size={14} />
@@ -305,11 +212,9 @@ function ResumeReviewPage() {
                 <div className="w-16 h-16 rounded-full bg-brand-500/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
                   <FaFilePdf size={32} className="text-brand-400" />
                 </div>
-
                 <h3 className="text-lg font-semibold text-white mb-2">
                   Analyzing your resume...
                 </h3>
-
                 <p className="text-gray-400 text-sm">
                   Our AI is reviewing your resume for ATS compatibility,
                   keywords, and improvements.
@@ -320,7 +225,6 @@ function ResumeReviewPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FaFilePdf size={20} className="text-rose-400" />
-
                     <div>
                       <p className="text-white font-medium text-sm">
                         {reviewResult.fileName}
@@ -354,14 +258,12 @@ function ResumeReviewPage() {
                     Improvement Suggestions
                   </h3>
 
-                  {reviewResult.improvements.map(function (improvement, index) {
-                    return (
-                      <ImprovementCard
-                        key={index}
-                        improvement={improvement}
-                      />
-                    );
-                  })}
+                  {reviewResult.improvements.map((improvement, index) => (
+                    <ImprovementCard
+                      key={index}
+                      improvement={improvement}
+                    />
+                  ))}
                 </div>
               </div>
             ) : (
@@ -369,11 +271,9 @@ function ResumeReviewPage() {
                 <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center mx-auto mb-4">
                   <FaUpload size={28} className="text-gray-500" />
                 </div>
-
                 <h3 className="text-lg font-semibold text-white mb-1">
                   No resume analyzed yet
                 </h3>
-
                 <p className="text-gray-400 text-sm">
                   Upload your resume to see AI-powered feedback.
                 </p>

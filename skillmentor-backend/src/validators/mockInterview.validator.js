@@ -16,6 +16,7 @@ const createSchema = Joi.object({
   type: Joi.string().valid('technical', 'hr', 'system-design', 'behavioral', 'mixed').required(),
   difficulty: Joi.string().valid('easy', 'medium', 'hard').default('medium'),
   durationMinutes: Joi.number().integer().min(5).max(240).default(30),
+  scheduledAt: Joi.date(),
   questions: Joi.array().items(questionSchema).default([]),
   status: Joi.string().valid('scheduled', 'in-progress', 'completed', 'cancelled').default('scheduled'),
 });
@@ -25,6 +26,7 @@ const updateSchema = Joi.object({
   type: Joi.string().valid('technical', 'hr', 'system-design', 'behavioral', 'mixed'),
   difficulty: Joi.string().valid('easy', 'medium', 'hard'),
   durationMinutes: Joi.number().integer().min(5).max(240),
+  scheduledAt: Joi.date(),
   questions: Joi.array().items(questionSchema),
   status: Joi.string().valid('scheduled', 'in-progress', 'completed', 'cancelled'),
 }).min(1);

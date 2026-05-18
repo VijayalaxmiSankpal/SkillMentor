@@ -80,14 +80,13 @@ function ScheduleForm(props) {
     if (!validate()) return;
 
     const interviewData = {
-      date: date,
-      time: time,
-      duration: duration,
-      type: type,
-      role: role,
-      company: "Self",
-      notes: notes.trim(),
-    };
+  date: date,
+  time: time,
+  duration: duration,
+  role: role,
+  type: type.toLowerCase(),
+  difficulty: "medium",
+};
 
     props.onSchedule(interviewData);
   }

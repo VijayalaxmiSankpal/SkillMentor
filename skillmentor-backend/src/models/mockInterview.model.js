@@ -38,7 +38,7 @@ const mockInterviewSchema = new mongoose.Schema(
       default: 'medium',
     },
     durationMinutes: { type: Number, default: 30, min: 5, max: 240 },
-
+    scheduledAt: { type: Date },
     questions: [questionAnswerSchema],
 
     overallScore: { type: Number, min: 0, max: 10, default: 0 },

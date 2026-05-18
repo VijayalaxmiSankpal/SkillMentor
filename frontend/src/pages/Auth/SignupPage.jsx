@@ -111,7 +111,7 @@ const SignupPage = () => {
               and land the job you deserve — all in one place.
             </p>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* <div className="grid grid-cols-2 gap-4">
               <div className="card p-4 border-brand-500/20">
                 <div className="font-display text-2xl font-bold text-gradient mb-1">
                   10K+
@@ -147,8 +147,8 @@ const SignupPage = () => {
                   Roadmaps
                 </div>
               </div>
-            </div>
-          </div>
+            </div>*/}
+          </div> 
 
           <p className="text-slate-600 text-sm">
             © {new Date().getFullYear()} SkillMentor AI

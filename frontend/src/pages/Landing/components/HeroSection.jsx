@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { RiArrowRightLine, RiPlayCircleLine, RiStarFill } from "react-icons/ri";
+import { RiArrowRightLine, RiPlayCircleLine } from "react-icons/ri";
 
-const STATS = [
-  { value: "10K+", label: "Students"       },
-  { value: "95%",  label: "Interview Rate" },
-  { value: "200+", label: "AI Questions"   },
-  { value: "50+",  label: "Roadmaps"       },
-];
+// const STATS = [
+//   { value: "10K+", label: "Students"       },
+//   { value: "95%",  label: "Interview Rate" },
+//   { value: "200+", label: "AI Questions"   },
+//   { value: "50+",  label: "Roadmaps"       },
+// ];
 
 const scrollToFeatures = () => {
   const el = document.querySelector("#features");
@@ -32,14 +32,14 @@ const HeroSection = () => {
       </div>
 
       {/* Badge */}
-      <div className="animate-fade-in flex items-center gap-2 badge badge-indigo mb-6 py-1.5 px-4">
+      {/* <div className="animate-fade-in flex items-center gap-2 badge badge-indigo mb-6 py-1.5 px-4">
         <div className="flex">
           {[0, 1, 2, 3, 4].map((i) => (
             <RiStarFill key={i} className="text-yellow-400 text-xs" />
           ))}
         </div>
         <span>Trusted by 10,000+ students</span>
-      </div>
+      </div> */}
 
       {/* Heading */}
       <h1 className="animate-slide-up delay-100 font-display text-center text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6 max-w-5xl">
@@ -71,7 +71,7 @@ const HeroSection = () => {
       </div>
 
       {/* Stats */}
-      <div className="animate-slide-up delay-400 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl">
+      {/* <div className="animate-slide-up delay-400 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl">
         {STATS.map((stat) => (
           <div
             key={stat.label}
@@ -83,7 +83,7 @@ const HeroSection = () => {
             <div className="text-slate-400 text-sm">{stat.label}</div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-pulse-slow">
