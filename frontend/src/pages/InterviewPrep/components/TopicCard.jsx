@@ -1,87 +1,106 @@
 import React from "react";
+import {
+  FaCode,
+  FaDatabase,
+  FaDesktop,
+  FaNetworkWired,
+  FaSitemap,
+  FaCalculator,
+  FaUserTie,
+} from "react-icons/fa";
 
-function TopicProgress(props) {
-  const topics = props.topics;
+const ICONS = {
+  dsa: FaCode,
+  dbms: FaDatabase,
+  os: FaDesktop,
+  cn: FaNetworkWired,
+  "system-design": FaSitemap,
+  aptitude: FaCalculator,
+  hr: FaUserTie,
+};
 
-  const totalQuestions = topics.reduce(function (sum, t) {
-    return sum + t.totalQuestions;
-  }, 0);
+const COLOR_CLASSES = {
+  brand: "bg-brand-500/10 text-brand-400 border-brand-500/20",
+  emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  rose: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  purple: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  orange: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+  pink: "bg-pink-500/10 text-pink-400 border-pink-500/20",
+};
 
-  const completedQuestions = topics.reduce(function (sum, t) {
-    return sum + t.completedQuestions;
-  }, 0);
+function TopicCard(props) {
+  const topic = props.topic || {};
+  const Icon = ICONS[topic.id] || FaCode;
 
-  const progress = totalQuestions > 0 ? Math.round((completedQuestions / totalQuestions) * 100) : 0;
+  const total = topic.totalQuestions || 0;
+  const completed = topic.completedQuestions || 0;
+  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  const topicBars = topics.map(function (topic) {
-    const topicProgress = topic.totalQuestions > 0
-      ? Math.round((topic.completedQuestions / topic.totalQuestions) * 100)
-      : 0;
-    return {
-      name: topic.name,
-      progress: topicProgress,
-      completed: topic.completedQuestions,
-      total: topic.totalQuestions,
-      color: topic.color,
-    };
-  });
+  const colorClass =
+    COLOR_CLASSES[topic.color] ||
+    "bg-gray-500/10 text-gray-400 border-gray-500/20";
 
-  const COLOR_CLASSES = {
-    brand: "bg-brand-500",
-    emerald: "bg-emerald-500",
-    amber: "bg-amber-500",
-    rose: "bg-rose-500",
-    purple: "bg-purple-500",
-    cyan: "bg-cyan-500",
-    orange: "bg-orange-500",
-    pink: "bg-pink-500",
-  };
+  function handleClick() {
+    if (props.onClick) {
+      props.onClick();
+    }
+  }
 
   return (
-    <div className="card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-white font-semibold text-base">Topic-wise Progress</h3>
-          <p className="text-gray-400 text-xs mt-0.5">
-            {completedQuestions} of {totalQuestions} questions completed
-          </p>
+    <button
+      onClick={handleClick}
+      className="card p-5 text-left hover:border-brand-500/30 hover:-translate-y-0.5 transition-all"
+    >
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div
+          className={
+            "w-11 h-11 rounded-xl flex items-center justify-center border " +
+            colorClass
+          }
+        >
+          <Icon size={20} />
         </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-white">{progress}%</p>
-          <p className="text-xs text-gray-400">Overall</p>
-        </div>
+
+        <span className="text-xs text-slate-400">
+          {completed}/{total}
+        </span>
       </div>
 
-      <div className="w-full h-3 bg-surface rounded-full overflow-hidden mb-5">
+      <h3 className="text-white font-semibold text-base mb-1">
+        {topic.name}
+      </h3>
+
+      <p className="text-slate-400 text-xs leading-relaxed mb-4">
+        {topic.description}
+      </p>
+
+      <div className="w-full h-2 bg-surface rounded-full overflow-hidden mb-2">
         <div
-          className="h-full rounded-full bg-brand-500 transition-all duration-700"
+          className="h-full bg-brand-500 rounded-full transition-all"
           style={{ width: progress + "%" }}
         />
       </div>
 
-      <div className="space-y-3">
-        {topicBars.map(function (bar) {
-          const colorClass = COLOR_CLASSES[bar.color] || "bg-gray-500";
-          return (
-            <div key={bar.name}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-gray-300 truncate flex-1 mr-2">{bar.name}</span>
-                <span className="text-xs text-gray-400 shrink-0">
-                  {bar.completed}/{bar.total}
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden">
-                <div
-                  className={"h-full rounded-full transition-all duration-500 " + colorClass}
-                  style={{ width: bar.progress + "%" }}
-                />
-              </div>
-            </div>
-          );
-        })}
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-slate-500">Progress</span>
+        <span className="text-white font-semibold">{progress}%</span>
       </div>
-    </div>
+
+      {topic.weakAreas && topic.weakAreas.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {topic.weakAreas.slice(0, 2).map((area) => (
+            <span
+              key={area}
+              className="px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-400 text-xs border border-rose-500/20"
+            >
+              {area}
+            </span>
+          ))}
+        </div>
+      )}
+    </button>
   );
 }
 
-export default TopicProgress;
+export default TopicCard;

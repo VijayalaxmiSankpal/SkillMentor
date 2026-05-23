@@ -53,6 +53,8 @@ const codingLogSchema = new mongoose.Schema(
 
     notes: { type: String, default: '', maxlength: 2000 },
 
+    bookmarked: { type: Boolean, default: false, index: true },
+
     solvedAt: { type: Date, default: Date.now, index: true },
 
     isDeleted: { type: Boolean, default: false, index: true },

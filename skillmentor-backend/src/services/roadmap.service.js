@@ -9,24 +9,15 @@ const create = async (userId, payload) => {
   return Roadmap.create({ ...payload, user: userId });
 };
 
-const list = async (userId, query) => {
-  const { page, limit, skip } = getPagination(query);
-  const filter = { user: userId, isDeleted: false };
+const list = async (userId) => {
+  const roadmaps = await Roadmap.find({
+    user: userId,
+    isDeleted: false,
+  }).sort({ createdAt: -1 });
 
-  if (query.status) filter.status = query.status;
-  if (query.search) {
-    filter.$or = [
-      { title: { $regex: query.search, $options: 'i' } },
-      { targetRole: { $regex: query.search, $options: 'i' } },
-    ];
-  }
-
-  const [items, total] = await Promise.all([
-    Roadmap.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('skills', 'name category'),
-    Roadmap.countDocuments(filter),
-  ]);
-
-  return { items, meta: buildMeta({ total, page, limit }) };
+  return {
+    items: roadmaps,
+  };
 };
 
 const getById = async (userId, id) => {

@@ -30,4 +30,9 @@ router.post('/interview-questions', validate(interviewQuestionsSchema), ctrl.int
 router.get('/weak-analysis', ctrl.weakAnalysis);
 router.post('/study-plan', validate(studyPlanSchema), ctrl.studyPlan);
 
+// Saved Questions
+router.post('/saved-questions', ctrl.saveQuestion);
+router.get('/saved-questions', ctrl.listSavedQuestions);
+router.delete('/saved-questions/:id', validate(idParamSchema, 'params'), ctrl.deleteSavedQuestion);
+
 module.exports = router;

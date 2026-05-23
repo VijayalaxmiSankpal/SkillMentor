@@ -1,10 +1,15 @@
 import api from "./api";
 
-const mentorChat = (message, chatId = null) => {
-  return api.post("/ai/mentor", {
+const mentorChat = (message, chatId) => {
+  const payload = {
     message,
-    chatId,
-  });
+  };
+
+  if (chatId) {
+    payload.chatId = chatId;
+  }
+
+  return api.post("/ai/mentor", payload);
 };
 
 const generateInterviewQuestions = (payload) => {
@@ -16,10 +21,39 @@ const generateInterviewQuestions = (payload) => {
     count: payload.count,
   });
 };
+const listChats = () => {
+  return api.get("/ai/chats?context=mentor");
+};
+
+const getChat = (chatId) => {
+  return api.get(`/ai/chats/${chatId}`);
+};
+
+const deleteChat = (chatId) => {
+  return api.delete(`/ai/chats/${chatId}`);
+};
+
+const saveQuestion = (question) => {
+  return api.post("/ai/saved-questions", question);
+};
+
+const listSavedQuestions = () => {
+  return api.get("/ai/saved-questions");
+};
+
+const deleteSavedQuestion = (id) => {
+  return api.delete(`/ai/saved-questions/${id}`);
+};
 
 const aiService = {
   mentorChat,
+  listChats,
+  getChat,
+  deleteChat,
   generateInterviewQuestions,
+  saveQuestion,
+listSavedQuestions,
+deleteSavedQuestion,
 };
 
 export default aiService;

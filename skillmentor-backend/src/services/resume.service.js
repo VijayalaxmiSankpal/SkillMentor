@@ -44,12 +44,14 @@ const uploadAndReview = async (userId, file, { targetRole = '' }) => {
 
     review.atsScore = Number(analysis.atsScore) || 0;
     review.feedback = {
-      summary: analysis.summary || '',
-      strengths: analysis.strengths || [],
-      weaknesses: analysis.weaknesses || [],
-      suggestions: analysis.suggestions || [],
-      missingKeywords: analysis.missingKeywords || [],
-    };
+  summary: analysis.summary || '',
+  strengths: analysis.strengths || [],
+  weaknesses: analysis.weaknesses || [],
+  suggestions: analysis.suggestions || [],
+  matchedKeywords: analysis.matchedKeywords || [],
+  missingKeywords: analysis.missingKeywords || [],
+  sections: analysis.sections || [],
+};
     review.status = 'completed';
     await review.save();
 

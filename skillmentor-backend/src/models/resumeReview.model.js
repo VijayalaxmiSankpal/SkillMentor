@@ -21,13 +21,22 @@ const resumeReviewSchema = new mongoose.Schema(
 
     atsScore: { type: Number, min: 0, max: 100, default: 0 },
 
-    feedback: {
-      summary: { type: String, default: '' },
-      strengths: [{ type: String }],
-      weaknesses: [{ type: String }],
-      suggestions: [{ type: String }],
-      missingKeywords: [{ type: String }],
+   feedback: {
+  summary: { type: String, default: '' },
+  strengths: [{ type: String }],
+  weaknesses: [{ type: String }],
+  suggestions: [{ type: String }],
+  matchedKeywords: [{ type: String }],
+  missingKeywords: [{ type: String }],
+  sections: [
+    {
+      name: { type: String, default: "" },
+      score: { type: Number, default: 0 },
+      status: { type: String, default: "warning" },
+      feedback: { type: String, default: "" },
     },
+  ],
+},
 
     status: {
       type: String,

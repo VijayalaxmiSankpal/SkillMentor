@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaMagic, FaBookmark } from "react-icons/fa";
 import toast from "react-hot-toast";
 import GeneratedQuestion from "./components/GeneratedQuestion";
@@ -38,6 +38,25 @@ function QuestionGeneratorPage() {
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [savedQuestions, setSavedQuestions] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  useEffect(() => {
+  loadSavedQuestions();
+}, []);
+
+const loadSavedQuestions = async () => {
+  try {
+    const response = await aiService.listSavedQuestions();
+
+    const items =
+      response.data?.data?.items || [];
+
+    setSavedQuestions(items);
+  } catch (error) {
+    console.error(
+      "Load saved questions failed:",
+      error
+    );
+  }
+};
 
   const availableTopics = useMemo(() => {
     if (!selectedRole) return [];
@@ -105,33 +124,56 @@ function QuestionGeneratorPage() {
     }
   };
 
-  const handleSaveQuestion = (question) => () => {
-    setSavedQuestions((prev) => {
-      const exists = prev.find((q) => q.id === question.id);
-
-      if (exists) {
-        toast("Already saved!");
-        return prev;
-      }
-
-      toast.success("Question saved!");
-      return [...prev, { ...question, saved: true }];
+  const handleSaveQuestion = (question) => async () => {
+  try {
+    const response = await aiService.saveQuestion({
+      role: selectedRole?.name || question.roleId || "Interview",
+      topic: question.topic,
+      question: question.question,
+      answer: question.answer,
+      difficulty: question.difficulty,
+      type: question.type,
     });
 
-    setGeneratedQuestions((prev) =>
-      prev.map((q) => {
-        if (q.id === question.id) {
-          return { ...q, saved: true };
-        }
-        return q;
-      })
-    );
-  };
+    const saved = response.data?.data?.question;
 
-  const handleDeleteSaved = (questionId) => {
-    setSavedQuestions((prev) => prev.filter((q) => q.id !== questionId));
+    setSavedQuestions((prev) => [saved, ...prev]);
+
+    setGeneratedQuestions((prev) =>
+      prev.map((q) =>
+        q.id === question.id ? { ...q, saved: true } : q
+      )
+    );
+
+    toast.success("Question saved!");
+  } catch (error) {
+    console.error("Save question failed:", error);
+    toast.error(error?.response?.data?.message || "Failed to save question");
+  }
+};
+
+  const handleDeleteSaved = async (questionId) => {
+  try {
+    await aiService.deleteSavedQuestion(questionId);
+
+    setSavedQuestions((prev) =>
+      prev.filter(
+        (q) =>
+          q._id !== questionId &&
+          q.id !== questionId
+      )
+    );
+
     toast.success("Removed from saved");
-  };
+  } catch (error) {
+    console.error(
+      "Delete saved question failed:",
+      error
+    );
+
+    toast.error("Failed to remove question");
+  }
+};
 
   const handleCopyQuestion = (text) => () => {
     navigator.clipboard.writeText(text).then(() => {

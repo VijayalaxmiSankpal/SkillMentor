@@ -4,7 +4,18 @@ const Joi = require('joi');
 
 const objectId = Joi.string().regex(/^[0-9a-fA-F]{24}$/).message('Invalid ID');
 
-const subjectSchema = Joi.string().valid('dsa', 'dbms', 'os', 'cn', 'aptitude', 'hr', 'system-design');
+const subjectSchema = Joi.string().valid(
+  'frontend',
+  'backend',
+  'fullstack',
+  'dsa',
+  'dbms',
+  'os',
+  'cn',
+  'aptitude',
+  'hr',
+  'system-design'
+);
 
 const topicSchema = Joi.object({
   name: Joi.string().trim().min(1).max(100).required(),

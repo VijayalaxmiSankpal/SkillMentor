@@ -211,7 +211,15 @@ function QuestionModal(props) {
               {bookmarked ? "Bookmarked" : "Add Bookmark"}
             </button>
           </div>
-
+<div className="pt-2">
+  <button
+    type="button"
+    onClick={props.onGenerateAI}
+    className="w-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-xl py-3 text-sm font-medium transition-all"
+  >
+    ✨ Generate AI Answer
+  </button>
+</div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={handleClose} className={btnSecondary}>
               {CANCEL_BUTTON_TEXT}

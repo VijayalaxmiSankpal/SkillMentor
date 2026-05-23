@@ -19,6 +19,7 @@ router.use('/users', require('./user.routes'));
 router.use('/roadmaps', require('./roadmap.routes'));
 router.use('/notes', require('./notes.routes'));
 router.use('/coding', require('./coding.routes'));
+router.use('/courses', require('./course.routes'));
 router.use('/interview-prep', require('./interview.routes'));
 router.use('/mock-interviews', require('./mockInterview.routes'));
 router.use('/ai', require('./ai.routes'));

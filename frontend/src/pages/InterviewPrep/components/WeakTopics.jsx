@@ -2,7 +2,7 @@ import React from "react";
 import { FaExclamationTriangle, FaArrowRight } from "react-icons/fa";
 
 function WeakTopics(props) {
-  const topics = props.topics;
+  const topics = props.topics || [];
 
   if (topics.length === 0) {
     return null;

@@ -1,5 +1,5 @@
 'use strict';
-
+const SavedQuestion = require('../models/savedQuestion.model');
 const mongoose = require('mongoose');
 const aiClient = require('../ai/ai.client');
 const AIChat = require('../models/aiChat.model');
@@ -177,6 +177,42 @@ const generateStudyPlan = async (payload) => {
   return aiClient.generateJSON(prompt);
 };
 
+const saveQuestion = async (userId, payload) => {
+  return SavedQuestion.create({
+    user: userId,
+    role: payload.role,
+    topic: payload.topic,
+    question: payload.question,
+    answer: payload.answer,
+    difficulty: payload.difficulty,
+    type: payload.type,
+  });
+};
+
+const listSavedQuestions = async (userId) => {
+  const items = await SavedQuestion.find({
+    user: userId,
+    isDeleted: false,
+  }).sort({ createdAt: -1 });
+
+  return { items };
+};
+
+const deleteSavedQuestion = async (userId, id) => {
+  const question = await SavedQuestion.findOne({
+    _id: id,
+    user: userId,
+    isDeleted: false,
+  });
+
+  if (!question) {
+    throw ApiError.notFound('Saved question not found');
+  }
+
+  question.isDeleted = true;
+  await question.save();
+};
+
 module.exports = {
   mentorChat,
   listChats,
@@ -185,4 +221,7 @@ module.exports = {
   generateInterviewQuestions,
   analyzeWeakTopics,
   generateStudyPlan,
+  saveQuestion,
+listSavedQuestions,
+deleteSavedQuestion,
 };

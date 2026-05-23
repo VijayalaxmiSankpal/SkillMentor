@@ -47,7 +47,9 @@ const DashboardPage = () => {
   const stats = dashboardData?.stats || {};
   const difficulty = dashboardData?.difficulty || {};
   const weeklyActivity = dashboardData?.weeklyActivity || [];
-  const recentActivity = dashboardData?.recentActivity || [];
+const recentActivity = dashboardData?.recentActivity || [];
+const byPlatform = dashboardData?.byPlatform || {};
+const topTopics = dashboardData?.topTopics || [];
 
   const STATS = [
     {
@@ -142,13 +144,22 @@ const DashboardPage = () => {
       )}
 
       <ChartSection
-        weeklyActivity={weeklyActivity}
-        difficulty={difficulty}
-      />
+  weeklyActivity={weeklyActivity}
+  difficulty={difficulty}
+  byPlatform={byPlatform}
+  topTopics={topTopics}
+/>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <div className="xl:col-span-2">
-          <ProgressSection stats={stats} />
+          <ProgressSection
+  stats={{
+    ...stats,
+    roadmapBars: dashboardData?.roadmapBars || [],
+    interviewReadiness: dashboardData?.interviewReadiness || [],
+    courseProgress: dashboardData?.courseProgress || [],
+  }}
+/>
         </div>
 
         <div>

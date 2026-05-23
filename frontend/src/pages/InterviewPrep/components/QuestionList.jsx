@@ -1,5 +1,15 @@
 import React from "react";
-import { FaEdit, FaTrash, FaBookmark, FaRegBookmark, FaCheck, FaRegCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaBookmark,
+  FaRegBookmark,
+  FaCheck,
+  FaRegCircle,
+  FaChevronDown,
+  FaChevronUp,
+  FaBrain,
+} from "react-icons/fa";
 import { useState } from "react";
 
 const DIFFICULTY_STYLES = {

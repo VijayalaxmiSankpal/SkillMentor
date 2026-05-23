@@ -34,5 +34,26 @@ const saveFeedback = asyncHandler(async (req, res) => {
   const interview = await service.saveFeedback(req.user.id, req.params.id, req.body);
   return new ApiResponse(STATUS_CODES.OK, { interview }, MESSAGES.MOCK.FEEDBACK_SAVED).send(res);
 });
+const evaluateAnswers = asyncHandler(async (req, res) => {
+  const interview = await service.evaluateAnswers(
+    req.user.id,
+    req.params.id,
+    req.body
+  );
 
-module.exports = { create, list, getById, update, remove, saveFeedback };
+  return new ApiResponse(
+    STATUS_CODES.OK,
+    { interview },
+    'Interview evaluated successfully'
+  ).send(res);
+});
+
+module.exports = {
+  create,
+  list,
+  getById,
+  update,
+  remove,
+  saveFeedback,
+  evaluateAnswers,
+};

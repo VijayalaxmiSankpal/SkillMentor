@@ -8,7 +8,18 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
+
+const COLORS = [
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#14b8a6",
+  "#f59e0b",
+];
 
 const CustomTooltip = ({
   active,
@@ -44,27 +55,46 @@ const CustomTooltip = ({
 const ChartSection = ({
   weeklyActivity = [],
   difficulty = {},
+  byPlatform = {},
+  topTopics = [],
 }) => {
   const DIFFICULTY_DATA = [
     {
       name: "Easy",
-      solved: difficulty.Easy || difficulty.easy || 0,
+      solved:
+        difficulty.Easy ||
+        difficulty.easy ||
+        0,
     },
     {
       name: "Medium",
-      solved: difficulty.Medium || difficulty.medium || 0,
+      solved:
+        difficulty.Medium ||
+        difficulty.medium ||
+        0,
     },
     {
       name: "Hard",
-      solved: difficulty.Hard || difficulty.hard || 0,
+      solved:
+        difficulty.Hard ||
+        difficulty.hard ||
+        0,
     },
   ];
 
+  const PLATFORM_DATA =
+    Object.entries(byPlatform).map(
+      ([name, value]) => ({
+        name,
+        value,
+      })
+    );
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
 
       {/* Weekly Activity */}
-      <div className="card p-6 lg:col-span-2">
+      <div className="card p-6 xl:col-span-2">
 
         <div className="flex items-center justify-between mb-6">
 
@@ -86,7 +116,7 @@ const ChartSection = ({
 
         <ResponsiveContainer
           width="100%"
-          height={200}
+          height={220}
         >
           <AreaChart
             data={weeklyActivity}
@@ -153,11 +183,10 @@ const ChartSection = ({
         </ResponsiveContainer>
       </div>
 
-      {/* Difficulty Chart */}
+      {/* Difficulty */}
       <div className="card p-6">
 
         <div className="mb-6">
-
           <h3 className="font-display text-lg font-bold text-white">
             By Difficulty
           </h3>
@@ -165,12 +194,11 @@ const ChartSection = ({
           <p className="text-slate-500 text-xs mt-0.5">
             Problems solved
           </p>
-
         </div>
 
         <ResponsiveContainer
           width="100%"
-          height={200}
+          height={220}
         >
           <BarChart
             data={DIFFICULTY_DATA}
@@ -213,38 +241,117 @@ const ChartSection = ({
             />
           </BarChart>
         </ResponsiveContainer>
+      </div>
 
-        <div className="flex flex-col gap-2 mt-4">
+      {/* Platforms */}
+      <div className="card p-6">
 
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400">
-              Easy
-            </span>
+        <div className="mb-6">
+          <h3 className="font-display text-lg font-bold text-white">
+            Platforms
+          </h3>
 
-            <span className="text-white font-semibold">
-              {difficulty.Easy || difficulty.easy || 0}
-            </span>
+          <p className="text-slate-500 text-xs mt-0.5">
+            Practice distribution
+          </p>
+        </div>
+
+        <ResponsiveContainer
+          width="100%"
+          height={220}
+        >
+          <PieChart>
+
+            <Pie
+              data={PLATFORM_DATA}
+              dataKey="value"
+              nameKey="name"
+              outerRadius={80}
+            >
+              {PLATFORM_DATA.map(
+                (entry, index) => (
+                  <Cell
+                    key={entry.name}
+                    fill={
+                      COLORS[
+                        index %
+                          COLORS.length
+                      ]
+                    }
+                  />
+                )
+              )}
+            </Pie>
+
+            <Tooltip />
+
+          </PieChart>
+        </ResponsiveContainer>
+
+      </div>
+
+      {/* Top Topics */}
+      <div className="card p-6 xl:col-span-4">
+
+        <div className="flex items-center justify-between mb-5">
+
+          <div>
+            <h3 className="font-display text-lg font-bold text-white">
+              Top Practiced Topics
+            </h3>
+
+            <p className="text-slate-500 text-xs mt-0.5">
+              Most solved categories
+            </p>
           </div>
 
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400">
-              Medium
-            </span>
+          <span className="badge badge-indigo">
+            Analytics
+          </span>
 
-            <span className="text-white font-semibold">
-              {difficulty.Medium || difficulty.medium || 0}
-            </span>
-          </div>
+        </div>
 
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400">
-              Hard
-            </span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
 
-            <span className="text-white font-semibold">
-              {difficulty.Hard || difficulty.hard || 0}
-            </span>
-          </div>
+          {topTopics.length === 0 ? (
+            <div className="text-slate-500 text-sm">
+              No topic data yet
+            </div>
+          ) : (
+            topTopics.map(
+              (topic, index) => (
+                <div
+                  key={topic.topic}
+                  className="card p-4 border border-surface-border"
+                >
+
+                  <div className="flex items-center justify-between mb-2">
+
+                    <span className="text-white font-medium text-sm">
+                      {topic.topic}
+                    </span>
+
+                    <span
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{
+                        background:
+                          COLORS[
+                            index %
+                              COLORS.length
+                          ],
+                      }}
+                    />
+
+                  </div>
+
+                  <p className="text-slate-400 text-xs">
+                    {topic.count} solved
+                  </p>
+
+                </div>
+              )
+            )
+          )}
 
         </div>
       </div>

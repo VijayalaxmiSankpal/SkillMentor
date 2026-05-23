@@ -18,9 +18,13 @@ const mockInterviewService = {
   },
 
   createInterview: async (interviewData) => {
-    const response = await axiosInstance.post("/mock-interviews", interviewData, {
-      headers: getAuthHeaders(),
-    });
+    const response = await axiosInstance.post(
+      "/mock-interviews",
+      interviewData,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
 
     return response.data;
   },
@@ -38,9 +42,12 @@ const mockInterviewService = {
   },
 
   deleteInterview: async (id) => {
-    const response = await axiosInstance.delete(`/mock-interviews/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await axiosInstance.delete(
+      `/mock-interviews/${id}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
 
     return response.data;
   },
@@ -49,6 +56,31 @@ const mockInterviewService = {
     const response = await axiosInstance.post(
       `/mock-interviews/${id}/feedback`,
       feedbackData,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+
+    return response.data;
+  },
+  generateQuestions: async (payload) => {
+  const response = await axiosInstance.post(
+    "/ai/interview-questions",
+    payload,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return response.data;
+},
+
+  evaluateInterview: async (id, answers) => {
+    const response = await axiosInstance.post(
+      `/mock-interviews/${id}/evaluate`,
+      {
+        answers,
+      },
       {
         headers: getAuthHeaders(),
       }

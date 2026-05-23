@@ -27,9 +27,9 @@ const formatReview = (review) => ({
   reviewedAt: review.createdAt,
   status: review.status,
   overallFeedback: review.feedback?.summary || "",
-  sections: [],
+  sections: review.feedback?.sections || [],
   keywords: {
-    matched: [],
+    matched: review.feedback?.matchedKeywords || [],
     missing: review.feedback?.missingKeywords || [],
     score: review.atsScore || 0,
   },

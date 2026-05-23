@@ -100,13 +100,18 @@ const RoadmapPhase = function(props) {
             {skills.map(function(skill) {
               return (
                 <SkillCard
-                  key={skill.name}
-                  name={skill.name}
-                  status={skill.status}
-                  duration={skill.duration}
-                  topics={skill.topics}
-                  link={skill.link}
-                />
+  key={skill.name}
+  name={skill.name}
+  status={skill.status}
+  duration={skill.duration}
+  topics={skill.topics}
+  link={skill.link}
+  videoLink={skill.videoLink}
+  onToggleComplete={() =>
+    props.onToggleSkill &&
+    props.onToggleSkill(skill.name)
+  }
+/>
               );
             })}
           </div>

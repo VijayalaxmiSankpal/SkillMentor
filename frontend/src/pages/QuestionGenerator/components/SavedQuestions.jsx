@@ -25,7 +25,7 @@ function SavedQuestions(props) {
       </div>
       {questions.map(function (question) {
         function handleDelete() {
-          props.onDelete(question.id);
+          props.onDelete(question._id || question.id)
         }
 
         function handleCopy() {

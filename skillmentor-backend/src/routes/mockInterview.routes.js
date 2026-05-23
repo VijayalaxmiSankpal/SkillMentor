@@ -8,6 +8,7 @@ const {
   createSchema,
   updateSchema,
   feedbackSchema,
+  answerSchema,
   idParamSchema,
 } = require('../validators/mockInterview.validator');
 
@@ -32,5 +33,10 @@ router.post(
   validate(feedbackSchema),
   ctrl.saveFeedback
 );
-
+router.post(
+  '/:id/evaluate',
+  validate(idParamSchema, 'params'),
+  validate(answerSchema),
+  ctrl.evaluateAnswers
+);
 module.exports = router;

@@ -37,10 +37,70 @@ function AIMentorPage() {
   const activeMessages = activeConversation ? activeConversation.messages : [];
 
   useEffect(() => {
+    loadChats();
+  }, []);
+
+  useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [activeMessages, isLoading]);
+
+  async function loadChats() {
+    try {
+      const response = await aiService.listChats();
+      const data = response.data?.data || response.data;
+      const items = data.items || [];
+
+      if (items.length === 0) return;
+
+      const formattedChats = items.map((chat) => ({
+        id: chat._id,
+        title: chat.title || "AI Mentor Chat",
+        timestamp: chat.updatedAt || chat.createdAt,
+        messages: [],
+      }));
+
+      setConversations(formattedChats);
+      setActiveConversationId(formattedChats[0].id);
+      await loadChatById(formattedChats[0].id);
+    } catch (error) {
+      console.error("Load AI chats failed:", error);
+    }
+  }
+
+  async function loadChatById(chatId) {
+    try {
+      const response = await aiService.getChat(chatId);
+      const data = response.data?.data || response.data;
+      const chat = data.chat || data;
+
+      const messages = (chat.messages || [])
+        .filter((m) => m.role !== "system")
+        .map((m, index) => ({
+          id: m._id || index,
+          role: m.role,
+          content: m.content,
+          timestamp: m.createdAt || chat.updatedAt,
+        }));
+
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === chatId
+            ? {
+                ...c,
+                title: chat.title || c.title,
+                timestamp: chat.updatedAt || c.timestamp,
+                messages,
+              }
+            : c
+        )
+      );
+    } catch (error) {
+      console.error("Load chat failed:", error);
+      toast.error("Failed to load chat");
+    }
+  }
 
   function handleNewChat() {
     const newConversation = {
@@ -50,36 +110,51 @@ function AIMentorPage() {
       messages: [],
     };
 
-    setConversations([newConversation]);
+    setConversations((prev) => [newConversation, ...prev]);
     setActiveConversationId(null);
   }
 
   function handleSelectConversation(conversationId) {
     return function () {
       setActiveConversationId(conversationId);
+      if (conversationId) {
+        loadChatById(conversationId);
+      }
     };
   }
 
-  function handleDeleteConversation(conversationId) {
-    setConversations((prev) => {
-      const filtered = prev.filter((c) => c.id !== conversationId);
+  async function handleDeleteConversation(conversationId) {
+    if (!conversationId) {
+      handleNewChat();
+      return;
+    }
 
-      if (filtered.length === 0) {
-        return [
-          {
-            id: null,
-            title: "New Conversation",
-            timestamp: new Date().toISOString(),
-            messages: [],
-          },
-        ];
-      }
+    try {
+      await aiService.deleteChat(conversationId);
 
-      return filtered;
-    });
+      setConversations((prev) => {
+        const filtered = prev.filter((c) => c.id !== conversationId);
 
-    setActiveConversationId(null);
-    toast.success("Conversation deleted");
+        if (filtered.length === 0) {
+          return [
+            {
+              id: null,
+              title: "New Conversation",
+              timestamp: new Date().toISOString(),
+              messages: [],
+            },
+          ];
+        }
+
+        return filtered;
+      });
+
+      setActiveConversationId(null);
+      toast.success("Conversation deleted");
+    } catch (error) {
+      console.error("Delete chat failed:", error);
+      toast.error("Failed to delete chat");
+    }
   }
 
   async function handleSendMessage(content) {
@@ -96,7 +171,7 @@ function AIMentorPage() {
 
     setConversations((prev) =>
       prev.map((c) => {
-        if (c.id === activeConversationId) {
+        if (c.id === activeConversationId || c.id === currentChatId) {
           return {
             ...c,
             title:
@@ -117,7 +192,7 @@ function AIMentorPage() {
     try {
       const response = await aiService.mentorChat(content.trim(), currentChatId);
 
-      const data = response.data;
+      const data = response.data?.data || response.data;
       const reply = data.reply;
       const chatId = data.chatId;
 
@@ -128,24 +203,36 @@ function AIMentorPage() {
         timestamp: new Date().toISOString(),
       };
 
-      setConversations((prev) =>
-        prev.map((c) => {
-          if (c.id === activeConversationId || c.id === null) {
-            return {
-              ...c,
-              id: chatId,
-              title:
-                c.messages.length <= 1
-                  ? content.trim().slice(0, 30)
-                  : c.title,
-              messages: [...c.messages, assistantMessage],
-              timestamp: new Date().toISOString(),
-            };
-          }
+      setConversations((prev) => {
+        const exists = prev.some((c) => c.id === chatId);
 
-          return c;
-        })
-      );
+        if (!exists) {
+          return [
+            {
+              id: chatId,
+              title: content.trim().slice(0, 30),
+              timestamp: new Date().toISOString(),
+              messages: [userMessage, assistantMessage],
+            },
+            ...prev.filter((c) => c.id !== null),
+          ];
+        }
+
+        return prev.map((c) =>
+          c.id === chatId || c.id === null
+            ? {
+                ...c,
+                id: chatId,
+                title:
+                  c.messages.length <= 1
+                    ? content.trim().slice(0, 30)
+                    : c.title,
+                messages: [...c.messages, assistantMessage],
+                timestamp: new Date().toISOString(),
+              }
+            : c
+        );
+      });
 
       setActiveConversationId(chatId);
     } catch (error) {

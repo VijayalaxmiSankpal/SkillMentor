@@ -40,6 +40,21 @@ const studyPlan = asyncHandler(async (req, res) => {
   return new ApiResponse(STATUS_CODES.OK, data, 'Study plan generated').send(res);
 });
 
+const saveQuestion = asyncHandler(async (req, res) => {
+  const question = await aiService.saveQuestion(req.user.id, req.body);
+  return new ApiResponse(STATUS_CODES.CREATED, { question }, 'Question saved').send(res);
+});
+
+const listSavedQuestions = asyncHandler(async (req, res) => {
+  const data = await aiService.listSavedQuestions(req.user.id);
+  return new ApiResponse(STATUS_CODES.OK, data, MESSAGES.GENERIC.FETCHED).send(res);
+});
+
+const deleteSavedQuestion = asyncHandler(async (req, res) => {
+  await aiService.deleteSavedQuestion(req.user.id, req.params.id);
+  return new ApiResponse(STATUS_CODES.OK, null, MESSAGES.GENERIC.DELETED).send(res);
+});
+
 module.exports = {
   mentorChat,
   listChats,
@@ -48,4 +63,7 @@ module.exports = {
   interviewQuestions,
   weakAnalysis,
   studyPlan,
+  saveQuestion,
+listSavedQuestions,
+deleteSavedQuestion,
 };

@@ -39,5 +39,22 @@ const feedbackSchema = Joi.object({
 }).min(1);
 
 const idParamSchema = Joi.object({ id: objectId.required() });
+const answerSchema = Joi.object({
+  answers: Joi.array()
+    .items(
+      Joi.object({
+        question: Joi.string().min(1).max(1000).required(),
+        answer: Joi.string().allow("").max(5000).required(),
+      })
+    )
+    .min(1)
+    .required(),
+});
 
-module.exports = { createSchema, updateSchema, feedbackSchema, idParamSchema };
+module.exports = {
+  createSchema,
+  updateSchema,
+  feedbackSchema,
+  answerSchema,
+  idParamSchema,
+};

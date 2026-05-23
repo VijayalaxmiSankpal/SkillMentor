@@ -26,7 +26,7 @@ function InterviewHistory(props) {
             key={interview.id}
             interview={interview}
             onShowFeedback={props.onShowFeedback}
-            showActions={interview.status === "scheduled" && interview.date < new Date().toISOString().split("T")[0] ? true : false}
+            showActions={true}
           />
         );
       })}

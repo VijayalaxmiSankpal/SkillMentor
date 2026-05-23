@@ -102,7 +102,7 @@ const formatProblemFromBackend = (log) => ({
   difficulty: difficultyToFrontend(log.difficulty),
   topic: log.topic || "Other",
   status: statusToFrontend(log.status),
-  bookmarked: false,
+  bookmarked: log.bookmarked || false,
   timeSpent: log.timeSpentMinutes || 0,
   notes: log.notes || "",
   link: log.questionUrl || "",
@@ -118,6 +118,7 @@ const formatProblemForBackend = (problemData) => ({
   questionUrl: problemData.link,
   timeSpentMinutes: Number(problemData.timeSpent) || 0,
   notes: problemData.notes || "",
+bookmarked: problemData.bookmarked || false,
   solvedAt:
     problemData.status === "solved"
       ? new Date().toISOString()
@@ -325,17 +326,40 @@ function CodingTrackerPage() {
     }
   }
 
-  function handleToggleBookmark(problemId) {
-    setProblems((prev) =>
-      prev.map((p) => {
-        if (p.id === problemId) {
-          return { ...p, bookmarked: !p.bookmarked };
-        }
+  async function handleToggleBookmark(problemId) {
+  const problem = problems.find(
+    (p) => p.id === problemId
+  );
 
-        return p;
-      })
+  if (!problem) return;
+
+  try {
+    await codingService.updateProblem(
+      problemId,
+      {
+        bookmarked:
+          !problem.bookmarked,
+      }
+    );
+
+    toast.success(
+      problem.bookmarked
+        ? "Bookmark removed"
+        : "Bookmarked"
+    );
+
+    await loadProblems();
+  } catch (error) {
+    console.error(
+      "Bookmark update failed:",
+      error
+    );
+
+    toast.error(
+      "Failed to update bookmark"
     );
   }
+}
 
   function handleOpenLink(url) {
     window.open(url, "_blank");

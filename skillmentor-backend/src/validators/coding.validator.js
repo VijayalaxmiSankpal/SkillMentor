@@ -14,6 +14,7 @@ const createSchema = Joi.object({
   status: Joi.string().valid('solved', 'attempted', 'revisit').default('solved'),
   timeSpentMinutes: Joi.number().min(0).default(0),
   notes: Joi.string().allow('').max(2000),
+  bookmarked: Joi.boolean(),
   solvedAt: Joi.date().default(() => new Date()),
 });
 
@@ -27,6 +28,7 @@ const updateSchema = Joi.object({
   status: Joi.string().valid('solved', 'attempted', 'revisit'),
   timeSpentMinutes: Joi.number().min(0),
   notes: Joi.string().allow('').max(2000),
+  bookmarked: Joi.boolean(),
   solvedAt: Joi.date(),
 }).min(1);
 
