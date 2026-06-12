@@ -55,15 +55,26 @@ const deleteSavedQuestion = asyncHandler(async (req, res) => {
   return new ApiResponse(STATUS_CODES.OK, null, MESSAGES.GENERIC.DELETED).send(res);
 });
 
+const evaluateAnswer = asyncHandler(async (req, res) => {
+  const data = await aiService.evaluateAnswer(req.body);
+
+  return new ApiResponse(
+    STATUS_CODES.OK,
+    data,
+    'Answer evaluated'
+  ).send(res);
+});
+
 module.exports = {
   mentorChat,
   listChats,
   getChat,
   deleteChat,
   interviewQuestions,
+  evaluateAnswer,
   weakAnalysis,
   studyPlan,
   saveQuestion,
-listSavedQuestions,
-deleteSavedQuestion,
+  listSavedQuestions,
+  deleteSavedQuestion,
 };

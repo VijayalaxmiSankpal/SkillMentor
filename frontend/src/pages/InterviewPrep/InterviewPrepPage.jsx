@@ -7,6 +7,7 @@ import {
   FaChartLine,
   FaPlus,
   FaMagic,
+  FaSave,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import TopicCard from "./components/TopicCard";
@@ -23,30 +24,65 @@ const TAB_REVISION = "revision";
 
 const SUBJECTS = [
   {
-  id: "frontend",
-  name: "Frontend Development",
-  description: "HTML, CSS, JavaScript, React, UI concepts",
-  color: "brand",
-},
-{
-  id: "backend",
-  name: "Backend Development",
-  description: "Node.js, Express, MongoDB, APIs, Auth",
-  color: "emerald",
-},
-{
-  id: "fullstack",
-  name: "Full Stack Development",
-  description: "Frontend + Backend + Database integration",
-  color: "purple",
-},
-  { id: "dsa", name: "Data Structures & Algorithms", description: "Arrays, Strings, Trees, Graphs, DP", color: "brand" },
-  { id: "dbms", name: "Database Management", description: "SQL, Normalization, Transactions, Indexing", color: "emerald" },
-  { id: "os", name: "Operating Systems", description: "Processes, Threads, Memory, Deadlocks", color: "amber" },
-  { id: "cn", name: "Computer Networks", description: "OSI, TCP/IP, HTTP, DNS, Routing", color: "rose" },
-  { id: "system-design", name: "System Design", description: "Scalability, Caching, Load Balancing", color: "purple" },
-  { id: "aptitude", name: "Aptitude & Reasoning", description: "Quant, Logical, Verbal, Puzzles", color: "orange" },
-  { id: "hr", name: "HR & Behavioral", description: "Self intro, strengths, scenarios", color: "pink" },
+    id: "frontend",
+    name: "Frontend Development",
+    description: "HTML, CSS, JavaScript, React, UI concepts",
+    color: "brand",
+  },
+  {
+    id: "backend",
+    name: "Backend Development",
+    description: "Node.js, Express, MongoDB, APIs, Auth",
+    color: "emerald",
+  },
+  {
+    id: "fullstack",
+    name: "Full Stack Development",
+    description: "Frontend + Backend + Database integration",
+    color: "purple",
+  },
+  {
+    id: "dsa",
+    name: "Data Structures & Algorithms",
+    description: "Arrays, Strings, Trees, Graphs, DP",
+    color: "brand",
+  },
+  {
+    id: "dbms",
+    name: "Database Management",
+    description: "SQL, Normalization, Transactions, Indexing",
+    color: "emerald",
+  },
+  {
+    id: "os",
+    name: "Operating Systems",
+    description: "Processes, Threads, Memory, Deadlocks",
+    color: "amber",
+  },
+  {
+    id: "cn",
+    name: "Computer Networks",
+    description: "OSI, TCP/IP, HTTP, DNS, Routing",
+    color: "rose",
+  },
+  {
+    id: "system-design",
+    name: "System Design",
+    description: "Scalability, Caching, Load Balancing",
+    color: "purple",
+  },
+  {
+    id: "aptitude",
+    name: "Aptitude & Reasoning",
+    description: "Quant, Logical, Verbal, Puzzles",
+    color: "orange",
+  },
+  {
+    id: "hr",
+    name: "HR & Behavioral",
+    description: "Self intro, strengths, scenarios",
+    color: "pink",
+  },
 ];
 
 const confidenceToDifficulty = (confidence) => {
@@ -64,8 +100,8 @@ const difficultyToConfidence = (difficulty) => {
 const subjectToSkill = (subjectId) => {
   const map = {
     frontend: "Frontend Development",
-backend: "Backend Development",
-fullstack: "Full Stack Development",
+    backend: "Backend Development",
+    fullstack: "Full Stack Development",
     dsa: "Data Structures and Algorithms",
     dbms: "Database Management System",
     os: "Operating Systems",
@@ -89,6 +125,8 @@ function InterviewPrepPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [generatingAI, setGeneratingAI] = useState(false);
+  const [questionCount, setQuestionCount] = useState(5);
+  const [generatedQuestions, setGeneratedQuestions] = useState([]);
 
   const loadPrep = async () => {
     try {
@@ -112,7 +150,6 @@ function InterviewPrepPage() {
     return SUBJECTS.map((subject) => {
       const prep = preps.find((p) => p.subject === subject.id);
       const subjectTopics = prep?.topics || [];
-
       const completed = subjectTopics.filter((t) => t.confidence >= 4).length;
       const weakAreas = subjectTopics
         .filter((t) => t.confidence <= 2)
@@ -185,7 +222,9 @@ function InterviewPrepPage() {
 
   const handleTabChange = (tab) => () => {
     setActiveTab(tab);
-    if (tab !== TAB_QUESTIONS) setSelectedTopicId(null);
+    if (tab !== TAB_QUESTIONS) {
+      setSelectedTopicId(null);
+    }
   };
 
   const handleTopicClick = (topicId) => () => {
@@ -281,6 +320,7 @@ function InterviewPrepPage() {
           editingQuestion.id,
           payload
         );
+
         toast.success("Question updated!");
       } else {
         await interviewService.addTopic(subject, payload);
@@ -293,6 +333,40 @@ function InterviewPrepPage() {
     } catch (error) {
       console.error("Save question failed:", error);
       toast.error(error?.response?.data?.message || "Failed to save question");
+    }
+  };
+
+  const handleSaveGeneratedQuestion = async (question) => {
+    await handleSaveQuestion(question);
+
+    setGeneratedQuestions((prev) =>
+      prev.filter((item) => item.id !== question.id)
+    );
+  };
+
+  const handleSaveAllGeneratedQuestions = async () => {
+    if (generatedQuestions.length === 0) {
+      toast.error("No generated questions to save");
+      return;
+    }
+
+    try {
+      for (const question of generatedQuestions) {
+        const subject = question.topicId || selectedTopicId || "dsa";
+
+        await interviewService.addTopic(subject, {
+          name: (question.question || "").slice(0, 95),
+          notes: (question.answer || "").slice(0, 950),
+          confidence: difficultyToConfidence(question.difficulty),
+        });
+      }
+
+      toast.success("All generated questions saved!");
+      setGeneratedQuestions([]);
+      await loadPrep();
+    } catch (error) {
+      console.error("Save all generated questions failed:", error);
+      toast.error(error?.response?.data?.message || "Failed to save questions");
     }
   };
 
@@ -315,57 +389,116 @@ function InterviewPrepPage() {
     }
   };
 
-  const handleGenerateAIQuestion = async () => {
-  try {
-    setGeneratingAI(true);
+  const handleGeneratedAnswerChange = (questionId, value) => {
+    setGeneratedQuestions((prev) =>
+      prev.map((q) =>
+        q.id === questionId ? { ...q, userAnswer: value } : q
+      )
+    );
+  };
 
-    const subject = selectedTopicId || "dsa";
-    const skill = subjectToSkill(subject);
-
-    const response = await interviewService.generateAIQuestions({
-      role: "Frontend Developer",
-      type: subject === "system-design" ? "system-design" : "technical",
-      difficulty:
-        difficultyFilter !== "all"
-          ? difficultyFilter.toLowerCase()
-          : "medium",
-      skills: [skill],
-      count: 1,
-    });
-
-    const data = response.data?.data || response.data;
-    const aiQuestion = data.questions?.[0];
-
-    if (!aiQuestion) {
-      toast.error("AI did not return a question");
+  const handleEvaluateGeneratedAnswer = async (question) => {
+    if (!question.userAnswer || !question.userAnswer.trim()) {
+      toast.error("Please write your answer first");
       return;
     }
 
-    setEditingQuestion({
-      id: null,
-      topicId: subject,
-      question: aiQuestion.question || "",
-      answer:
-        aiQuestion.answer ||
-        aiQuestion.expectedAnswer ||
-        "Answer not provided by AI.",
-      difficulty:
-        difficultyFilter !== "all"
-          ? difficultyFilter
-          : "Medium",
-      bookmarked: false,
-    });
+    try {
+      setGeneratedQuestions((prev) =>
+        prev.map((q) =>
+          q.id === question.id ? { ...q, evaluating: true } : q
+        )
+      );
 
-    setShowQuestionModal(true);
-    setActiveTab(TAB_QUESTIONS);
-    toast.success("AI question generated!");
-  } catch (error) {
-    console.error("AI question generation failed:", error);
-    toast.error(error?.response?.data?.message || "AI generation failed");
-  } finally {
-    setGeneratingAI(false);
-  }
-};
+      const response = await interviewService.evaluateAnswer({
+        question: question.question,
+        userAnswer: question.userAnswer,
+        idealAnswer: question.answer,
+      });
+
+      const data = response.data?.data || response.data;
+
+      setGeneratedQuestions((prev) =>
+        prev.map((q) =>
+          q.id === question.id
+            ? { ...q, evaluation: data, evaluating: false }
+            : q
+        )
+      );
+
+      toast.success("Answer evaluated!");
+    } catch (error) {
+      console.error("Answer evaluation failed:", error);
+      toast.error(error?.response?.data?.message || "Evaluation failed");
+
+      setGeneratedQuestions((prev) =>
+        prev.map((q) =>
+          q.id === question.id ? { ...q, evaluating: false } : q
+        )
+      );
+    }
+  };
+
+  const handleGenerateAIQuestion = async () => {
+    try {
+      setGeneratingAI(true);
+
+      const subject = selectedTopicId || "frontend";
+      const skill = subjectToSkill(subject);
+
+      const response = await interviewService.generateAIQuestions({
+        role:
+          subject === "backend"
+            ? "Backend Developer"
+            : subject === "fullstack"
+            ? "Full Stack Developer"
+            : "Frontend Developer",
+        type: subject === "system-design" ? "system-design" : "technical",
+        difficulty:
+          difficultyFilter !== "all" ? difficultyFilter.toLowerCase() : "medium",
+        skills: [skill],
+        count: questionCount,
+      });
+
+      const data = response.data?.data || response.data;
+      const aiQuestions = data.questions || [];
+
+      if (!aiQuestions.length) {
+        toast.error("AI did not return questions");
+        return;
+      }
+
+      const formattedQuestions = aiQuestions.map((q, index) => ({
+        id: Date.now() + index,
+        topicId: subject,
+        question: q.question || "",
+        answer:
+          q.answer ||
+          q.expectedAnswer ||
+          q.explanation ||
+          q.sampleAnswer ||
+          q.modelAnswer ||
+          q.idealAnswer ||
+          "AI generated this question, but did not return an answer.",
+        showAnswer: false,
+        userAnswer: "",
+        evaluation: null,
+        evaluating: false,
+        difficulty: difficultyFilter !== "all" ? difficultyFilter : "Medium",
+        bookmarked: false,
+      }));
+
+      setGeneratedQuestions(formattedQuestions);
+      setActiveTab(TAB_QUESTIONS);
+
+      toast.success(`${formattedQuestions.length} AI questions generated!`);
+    } catch (error) {
+      console.error("AI question generation failed:", error);
+      toast.error(error?.response?.data?.message || "AI generation failed");
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
 
   const tabBase =
     "px-5 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 border";
@@ -387,30 +520,17 @@ function InterviewPrepPage() {
             <h1 className="text-3xl font-display font-bold text-white mb-1">
               Interview Preparation
             </h1>
+
             <p className="text-gray-400 text-sm">
-              Generate interview questions, practice answers, revise weak areas,
-              and track your preparation progress.
+              Generate multiple questions, save them, revise weak areas, and track your preparation.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleGenerateAIQuestion}
-              disabled={generatingAI}
-              className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium disabled:opacity-60"
-            >
-              <FaMagic size={14} />
-              {generatingAI ? "Generating..." : "Generate AI Question"}
-            </button>
-
-            <div className="card px-4 py-2 flex items-center gap-3">
-              <FaChartLine size={18} className="text-brand-400" />
-              <div>
-                <p className="text-xs text-gray-400">Overall Progress</p>
-                <p className="text-lg font-bold text-white">
-                  {overallProgress}%
-                </p>
-              </div>
+          <div className="card px-4 py-2 flex items-center gap-3">
+            <FaChartLine size={18} className="text-brand-400" />
+            <div>
+              <p className="text-xs text-gray-400">Overall Progress</p>
+              <p className="text-lg font-bold text-white">{overallProgress}%</p>
             </div>
           </div>
         </div>
@@ -540,9 +660,11 @@ function InterviewPrepPage() {
               {selectedTopic && (
                 <div className="flex items-center gap-2 pt-2 border-t border-surface-border">
                   <span className="text-sm text-gray-400">Viewing:</span>
+
                   <span className="badge-indigo text-xs px-2.5 py-1">
                     {selectedTopic.name}
                   </span>
+
                   <button
                     onClick={() => setSelectedTopicId(null)}
                     className="text-xs text-brand-400 hover:text-brand-300 ml-2"
@@ -553,24 +675,177 @@ function InterviewPrepPage() {
               )}
             </div>
 
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleGenerateAIQuestion}
-                disabled={generatingAI}
-                className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
-              >
-                <FaMagic size={12} />
-                {generatingAI ? "Generating..." : "Generate Question"}
-              </button>
+            <div className="card p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <select
+                  value={selectedTopicId || "frontend"}
+                  onChange={(e) => setSelectedTopicId(e.target.value)}
+                  className="bg-surface border border-surface-border rounded-xl px-3 py-2 text-white text-sm"
+                >
+                  {SUBJECTS.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </option>
+                  ))}
+                </select>
 
-              <button
-                onClick={handleAddQuestion}
-                className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-              >
-                <FaPlus size={12} />
-                Add Question
-              </button>
+                <select
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(Number(e.target.value))}
+                  className="bg-surface border border-surface-border rounded-xl px-3 py-2 text-white text-sm"
+                >
+                  <option value={5}>5 Questions</option>
+                  <option value={10}>10 Questions</option>
+                  <option value={20}>20 Questions</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleGenerateAIQuestion}
+                  disabled={generatingAI}
+                  className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
+                >
+                  <FaMagic size={12} />
+                  {generatingAI ? "Generating..." : "Generate Questions"}
+                </button>
+
+                <button
+                  onClick={handleAddQuestion}
+                  className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
+                >
+                  <FaPlus size={12} />
+                  Add Question
+                </button>
+              </div>
             </div>
+
+            {generatedQuestions.length > 0 && (
+              <div className="card p-5 border border-purple-500/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-white font-semibold">
+                      Generated Questions
+                    </h3>
+
+                    <p className="text-slate-400 text-xs mt-1">
+                      Write your answer, evaluate it, then reveal the AI answer if needed.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleSaveAllGeneratedQuestions}
+                    className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                  >
+                    <FaSave size={12} />
+                    Save All
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {generatedQuestions.map((question, index) => (
+                    <div
+                      key={question.id}
+                      className="bg-surface/60 border border-surface-border rounded-xl p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <p className="text-white text-sm font-medium">
+                            Q{index + 1}. {question.question}
+                          </p>
+
+                          <textarea
+                            value={question.userAnswer}
+                            onChange={(e) =>
+                              handleGeneratedAnswerChange(question.id, e.target.value)
+                            }
+                            placeholder="Write your answer here..."
+                            className="w-full mt-3 bg-surface border border-surface-border rounded-xl p-3 text-white text-sm"
+                            rows={4}
+                          />
+
+                          <button
+                            onClick={() => handleEvaluateGeneratedAnswer(question)}
+                            disabled={question.evaluating}
+                            className="mt-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 rounded-lg text-xs"
+                          >
+                            {question.evaluating ? "Evaluating..." : "Evaluate Answer"}
+                          </button>
+
+                          {question.evaluation && (
+                            <div className="mt-4 p-3 rounded-xl border border-brand-500/20 bg-brand-500/5">
+                              <p className="text-white font-semibold">
+                                Score: {question.evaluation.score}/10
+                              </p>
+
+                              <p className="text-slate-300 mt-2 text-sm">
+                                {question.evaluation.feedback}
+                              </p>
+
+                              {question.evaluation.strengths?.length > 0 && (
+                                <div className="mt-3">
+                                  <p className="text-emerald-400 text-sm font-medium">
+                                    Strengths
+                                  </p>
+
+                                  <ul className="list-disc ml-5 text-slate-300 text-sm">
+                                    {question.evaluation.strengths.map((item, i) => (
+                                      <li key={i}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {question.evaluation.missingPoints?.length > 0 && (
+                                <div className="mt-3">
+                                  <p className="text-rose-400 text-sm font-medium">
+                                    Missing Points
+                                  </p>
+
+                                  <ul className="list-disc ml-5 text-slate-300 text-sm">
+                                    {question.evaluation.missingPoints.map((item, i) => (
+                                      <li key={i}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {question.showAnswer ? (
+                            <p className="text-slate-400 text-xs mt-3">
+                              {question.answer}
+                            </p>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setGeneratedQuestions((prev) =>
+                                  prev.map((q) =>
+                                    q.id === question.id
+                                      ? { ...q, showAnswer: true }
+                                      : q
+                                  )
+                                );
+                              }}
+                              className="text-brand-400 text-xs mt-3 hover:text-brand-300"
+                            >
+                              Show AI Answer
+                            </button>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => handleSaveGeneratedQuestion(question)}
+                          className="bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 border border-brand-500/20 px-3 py-1.5 rounded-lg text-xs"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <QuestionList
               questions={filteredQuestions}

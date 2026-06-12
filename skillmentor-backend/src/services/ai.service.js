@@ -1,4 +1,5 @@
 'use strict';
+
 const SavedQuestion = require('../models/savedQuestion.model');
 const mongoose = require('mongoose');
 const aiClient = require('../ai/ai.client');
@@ -11,13 +12,9 @@ const { ensureOwner } = require('../helpers/ownership.helper');
 const { getPagination, buildMeta } = require('../helpers/pagination.helper');
 
 const { buildMentorSystemPrompt } = require('../ai/prompts/mentor.prompt');
-const { buildInterviewPrompt } = require('../ai/prompts/interview.prompt');
 const { buildWeakTopicPrompt } = require('../ai/prompts/weakTopic.prompt');
 const { buildStudyPlanPrompt } = require('../ai/prompts/studyPlan.prompt');
 
-/* ----------------------------------------------------------
- * Helper: format chat history for Groq
- * ---------------------------------------------------------- */
 const formatHistoryForGemini = (messages = []) =>
   messages
     .filter((m) => m.role !== 'system')
@@ -26,14 +23,12 @@ const formatHistoryForGemini = (messages = []) =>
       content: m.content,
     }));
 
-/* ----------------------------------------------------------
- * AI Mentor (chat with history)
- * ---------------------------------------------------------- */
 const mentorChat = async (userId, { chatId, message }) => {
   const user = await User.findById(userId);
   if (!user) throw ApiError.notFound('User not found');
 
   let chat;
+
   if (chatId) {
     chat = await AIChat.findOne({ _id: chatId, isDeleted: false });
     ensureOwner(chat, userId, 'Chat');
@@ -43,27 +38,30 @@ const mentorChat = async (userId, { chatId, message }) => {
       context: 'mentor',
       title: message.slice(0, 60),
       messages: [
-        { role: 'system', content: buildMentorSystemPrompt(user) },
+        {
+          role: 'system',
+          content: buildMentorSystemPrompt(user),
+        },
       ],
     });
   }
 
-  // Prepend system prompt for Gemini context
-  const systemPrompt = chat.messages.find((m) => m.role === 'system')?.content
-    || buildMentorSystemPrompt(user);
+  const systemPrompt =
+    chat.messages.find((m) => m.role === 'system')?.content ||
+    buildMentorSystemPrompt(user);
 
-  // Construct history (system prompt baked into first user turn for Gemini)
   const history = formatHistoryForGemini(chat.messages);
-  const augmentedMessage = chat.messages.filter((m) => m.role !== 'system').length === 0
-    ? `${systemPrompt}\n\nUser question: ${message}`
-    : message;
+
+  const augmentedMessage =
+    chat.messages.filter((m) => m.role !== 'system').length === 0
+      ? `${systemPrompt}\n\nUser question: ${message}`
+      : message;
 
   const aiReply = await aiClient.generateChat(history, augmentedMessage);
 
   chat.messages.push({ role: 'user', content: message });
   chat.messages.push({ role: 'assistant', content: aiReply });
 
-  // Keep history bounded (last 40 messages + system)
   if (chat.messages.length > 41) {
     const system = chat.messages.find((m) => m.role === 'system');
     chat.messages = [system, ...chat.messages.slice(-40)].filter(Boolean);
@@ -71,65 +69,148 @@ const mentorChat = async (userId, { chatId, message }) => {
 
   await chat.save();
 
-  return { chatId: chat._id, reply: aiReply, chat };
+  return {
+    chatId: chat._id,
+    reply: aiReply,
+    chat,
+  };
 };
 
-/* ----------------------------------------------------------
- * Chat history
- * ---------------------------------------------------------- */
 const listChats = async (userId, query) => {
   const { page, limit, skip } = getPagination(query);
-  const filter = { user: userId, isDeleted: false };
-  if (query.context) filter.context = query.context;
+
+  const filter = {
+    user: userId,
+    isDeleted: false,
+  };
+
+  if (query.context) {
+    filter.context = query.context;
+  }
 
   const [items, total] = await Promise.all([
-    AIChat.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(limit).select('-messages'),
+    AIChat.find(filter)
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select('-messages'),
+
     AIChat.countDocuments(filter),
   ]);
-  return { items, meta: buildMeta({ total, page, limit }) };
+
+  return {
+    items,
+    meta: buildMeta({ total, page, limit }),
+  };
 };
 
 const getChat = async (userId, chatId) => {
-  const chat = await AIChat.findOne({ _id: chatId, isDeleted: false });
+  const chat = await AIChat.findOne({
+    _id: chatId,
+    isDeleted: false,
+  });
+
   ensureOwner(chat, userId, 'Chat');
+
   return chat;
 };
 
 const deleteChat = async (userId, chatId) => {
-  const chat = await AIChat.findOne({ _id: chatId, isDeleted: false });
+  const chat = await AIChat.findOne({
+    _id: chatId,
+    isDeleted: false,
+  });
+
   ensureOwner(chat, userId, 'Chat');
+
   chat.isDeleted = true;
+
   await chat.save();
 };
 
-/* ----------------------------------------------------------
- * Interview Questions
- * ---------------------------------------------------------- */
+const buildInterviewQuestionPrompt = (payload) => {
+  const role = payload.role || 'Software Developer';
+  const type = payload.type || 'technical';
+  const difficulty = payload.difficulty || 'medium';
+  const skills = Array.isArray(payload.skills) ? payload.skills : [];
+  const count = Number(payload.count || 5);
+
+  return `
+You are a senior technical interviewer.
+
+Generate ${count} interview preparation questions.
+
+Role: ${role}
+Interview type: ${type}
+Difficulty: ${difficulty}
+Skills/topics: ${skills.join(', ') || 'general software development'}
+
+IMPORTANT:
+- Return ONLY valid JSON.
+- Do not include markdown.
+- Do not include explanations outside JSON.
+- Every question MUST include a clear ideal answer.
+- The answer should be helpful but concise, around 4 to 6 lines.
+- Difficulty must be one of: Easy, Medium, Hard.
+
+Return EXACTLY this JSON shape:
+{
+  "questions": [
+    {
+      "question": "Write the interview question here",
+      "answer": "Write the ideal answer here in 4 to 6 lines",
+      "difficulty": "Medium"
+    }
+  ]
+}
+`.trim();
+};
+
 const generateInterviewQuestions = async (payload) => {
-  const prompt = buildInterviewPrompt(payload);
+  const prompt = buildInterviewQuestionPrompt(payload);
+
   const data = await aiClient.generateJSON(prompt);
 
   if (!data || !Array.isArray(data.questions)) {
     throw ApiError.internal('AI returned invalid question format');
   }
+
+  data.questions = data.questions.map((item) => ({
+    question: item.question || '',
+    answer:
+      item.answer ||
+      item.expectedAnswer ||
+      item.explanation ||
+      item.sampleAnswer ||
+      item.modelAnswer ||
+      item.idealAnswer ||
+      '',
+    difficulty: item.difficulty || 'Medium',
+  }));
+
   return data;
 };
 
-/* ----------------------------------------------------------
- * Weak Topic Analyzer
- * ---------------------------------------------------------- */
 const analyzeWeakTopics = async (userId) => {
   const objectUserId = mongoose.Types.ObjectId.createFromHexString(userId);
 
-  // Coding summary
   const codingAgg = await CodingLog.aggregate([
-    { $match: { user: objectUserId, isDeleted: false } },
+    {
+      $match: {
+        user: objectUserId,
+        isDeleted: false,
+      },
+    },
     {
       $group: {
         _id: '$topic',
         count: { $sum: 1 },
         avgTime: { $avg: '$timeSpentMinutes' },
-        revisitCount: { $sum: { $cond: [{ $eq: ['$status', 'revisit'] }, 1, 0] } },
+        revisitCount: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'revisit'] }, 1, 0],
+          },
+        },
       },
     },
     { $sort: { count: 1 } },
@@ -143,35 +224,43 @@ const analyzeWeakTopics = async (userId) => {
     needsRevisit: c.revisitCount,
   }));
 
-  // Interview weak topics
-  const preps = await InterviewPrep.find({ user: userId, isDeleted: false });
+  const preps = await InterviewPrep.find({
+    user: userId,
+    isDeleted: false,
+  });
+
   const interviewWeak = [];
+
   preps.forEach((p) => {
-    p.topics.filter((t) => t.isWeak).forEach((t) => {
-      interviewWeak.push({
-        subject: p.subject,
-        topic: t.name,
-        confidence: t.confidence,
+    p.topics
+      .filter((t) => t.isWeak)
+      .forEach((t) => {
+        interviewWeak.push({
+          subject: p.subject,
+          topic: t.name,
+          confidence: t.confidence,
+        });
       });
-    });
   });
 
   if (codingSummary.length === 0 && interviewWeak.length === 0) {
     return {
-      message: 'Not enough data to analyze. Log some coding practice and interview prep first.',
+      message:
+        'Not enough data to analyze. Log some coding practice and interview prep first.',
       weakAreas: [],
       recommendations: [],
       revisionPlan: {},
     };
   }
 
-  const prompt = buildWeakTopicPrompt({ codingSummary, interviewWeak });
+  const prompt = buildWeakTopicPrompt({
+    codingSummary,
+    interviewWeak,
+  });
+
   return aiClient.generateJSON(prompt);
 };
 
-/* ----------------------------------------------------------
- * Study Plan Generator
- * ---------------------------------------------------------- */
 const generateStudyPlan = async (payload) => {
   const prompt = buildStudyPlanPrompt(payload);
   return aiClient.generateJSON(prompt);
@@ -195,7 +284,9 @@ const listSavedQuestions = async (userId) => {
     isDeleted: false,
   }).sort({ createdAt: -1 });
 
-  return { items };
+  return {
+    items,
+  };
 };
 
 const deleteSavedQuestion = async (userId, id) => {
@@ -210,7 +301,42 @@ const deleteSavedQuestion = async (userId, id) => {
   }
 
   question.isDeleted = true;
+
   await question.save();
+};
+
+const evaluateAnswer = async (payload) => {
+  const prompt = `
+You are a senior technical interviewer.
+
+Evaluate the user's answer.
+
+Question:
+${payload.question}
+
+User Answer:
+${payload.userAnswer}
+
+Ideal Answer:
+${payload.idealAnswer || 'Not provided'}
+
+Return ONLY valid JSON in this exact format:
+{
+  "score": 0,
+  "isCorrect": false,
+  "feedback": "short explanation",
+  "strengths": ["point"],
+  "missingPoints": ["point"],
+  "idealAnswer": "clear ideal answer"
+}
+
+Rules:
+- score must be from 0 to 10
+- isCorrect should be true only if the answer is mostly correct
+- feedback should clearly say whether the answer is correct, partially correct, or incorrect
+`.trim();
+
+  return aiClient.generateJSON(prompt);
 };
 
 module.exports = {
@@ -222,6 +348,7 @@ module.exports = {
   analyzeWeakTopics,
   generateStudyPlan,
   saveQuestion,
-listSavedQuestions,
-deleteSavedQuestion,
+  listSavedQuestions,
+  deleteSavedQuestion,
+  evaluateAnswer,
 };

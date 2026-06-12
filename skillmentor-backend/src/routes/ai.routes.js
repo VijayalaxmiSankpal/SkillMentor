@@ -27,6 +27,7 @@ router.delete('/chats/:id', validate(idParamSchema, 'params'), ctrl.deleteChat);
 
 // Generators
 router.post('/interview-questions', validate(interviewQuestionsSchema), ctrl.interviewQuestions);
+router.post('/evaluate-answer', ctrl.evaluateAnswer);
 router.get('/weak-analysis', ctrl.weakAnalysis);
 router.post('/study-plan', validate(studyPlanSchema), ctrl.studyPlan);
 

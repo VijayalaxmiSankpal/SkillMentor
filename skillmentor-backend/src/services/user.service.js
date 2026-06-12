@@ -295,6 +295,9 @@ roadmapDocs.forEach((roadmap) => {
 const roadmapBars = Object.values(roadmapBarsMap).slice(0, 5);
 
 const subjectLabelMap = {
+  frontend: 'Frontend',
+  backend: 'Backend',
+  fullstack: 'Full Stack',
   dsa: 'DSA',
   dbms: 'DBMS',
   os: 'OS',
@@ -349,13 +352,13 @@ interviewReadiness,
 courseProgress,
 
     recentActivity: recentCodingLogs.map((log) => ({
-      id: log._id,
-      title: log.questionTitle,
-      platform: log.platform,
-      difficulty: log.difficulty,
-      topic: log.topic,
-      date: log.solvedAt || log.createdAt,
-    })),
+  id: log._id,
+  type: 'coding',
+  title: `Solved ${log.questionTitle}`,
+  subtitle: `${log.platform} — ${log.difficulty}`,
+  topic: log.topic,
+  date: log.solvedAt || log.createdAt,
+})),
   };
 };
 

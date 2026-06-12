@@ -9,6 +9,8 @@ function MockInterviewPage() {
   const [activeInterview, setActiveInterview] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+const [timerActive, setTimerActive] = useState(false);
 
   async function loadInterviews() {
     try {
@@ -26,6 +28,25 @@ function MockInterviewPage() {
   useEffect(() => {
     loadInterviews();
   }, []);
+
+  useEffect(() => {
+  if (!timerActive || timeLeft <= 0) return;
+
+  const timer = setInterval(() => {
+    setTimeLeft((prev) => {
+      if (prev <= 1) {
+        clearInterval(timer);
+        setTimerActive(false);
+        handleSubmitInterview();
+        return 0;
+      }
+
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [timerActive, timeLeft]);
 
   async function handleCreateInterview(domain = "frontend") {
   try {
@@ -102,6 +123,8 @@ function MockInterviewPage() {
     }));
 
     setAnswers(initialAnswers);
+    setTimeLeft((interview.durationMinutes || 30) * 60);
+setTimerActive(true);
   }
 
   function handleAnswerChange(index, value) {
@@ -115,6 +138,7 @@ function MockInterviewPage() {
   async function handleSubmitInterview() {
     try {
       if (!activeInterview) return;
+      setTimerActive(false);
 
       setLoading(true);
 
@@ -221,6 +245,12 @@ function MockInterviewPage() {
               <p className="text-slate-400 text-sm">
                 {activeInterview.type} interview
               </p>
+              {timerActive && (
+  <p className="text-amber-400 text-sm font-semibold mt-1">
+    Time Left: {Math.floor(timeLeft / 60)}:
+    {String(timeLeft % 60).padStart(2, "0")}
+  </p>
+)}
             </div>
 
             {activeInterview.overallScore > 0 && (

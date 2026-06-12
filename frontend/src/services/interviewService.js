@@ -34,6 +34,10 @@ const generateAIQuestions = (payload) => {
   });
 };
 
+const evaluateAnswer = (payload) => {
+  return api.post("/ai/evaluate-answer", payload);
+};
+
 const interviewService = {
   getAllPrep,
   upsertPrep,
@@ -42,6 +46,7 @@ const interviewService = {
   deleteTopic,
   getWeakTopics,
   generateAIQuestions,
+  evaluateAnswer,
 };
 
 export default interviewService;
