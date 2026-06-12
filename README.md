@@ -1,16 +1,63 @@
-# React + Vite
+# SkillMentor AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SkillMentor AI is a full-stack MERN learning and career preparation platform that helps users track coding practice, follow career roadmaps, prepare for interviews, review resumes with AI, manage courses, and monitor progress through a real-time analytics dashboard.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- User authentication with JWT
+- Email verification and password reset
+- AI Mentor chat
+- AI resume review and ATS feedback
+- Coding practice tracker
+- Career roadmap tracker
+- AI interview preparation
+- AI mock interview evaluation
+- Course enrollment and progress tracking
+- Notes management
+- Real-time dashboard analytics
+- Streak and achievement tracking
+- MongoDB-powered data persistence
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Frontend
+- React.js
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+- Recharts
+- React Hot Toast
 
-## Expanding the ESLint configuration
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT Authentication
+- Bcrypt
+- Multer
+- Nodemailer
+- Gemini AI / AI API integration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+
+```bash
+SkillMentor/
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── services/
+│   │   ├── context/
+│   │   └── assets/
+│
+├── skillmentor-backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── middleware/
+│   │   ├── validators/
+│   │   └── utils/
