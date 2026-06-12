@@ -15,7 +15,7 @@ const scrollToFeatures = () => {
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-16 overflow-hidden">
+    <section className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
 
       {/* Background Decorations */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
@@ -42,7 +42,7 @@ const HeroSection = () => {
       </div> */}
 
       {/* Heading */}
-      <h1 className="animate-slide-up delay-100 font-display text-center text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6 max-w-5xl">
+      <h1 className="animate-slide-up delay-100 font-display text-center text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6 max-w-5xl">
         <span className="text-white">Your AI-Powered</span>
         <br />
         <span className="text-gradient">Career Mentor</span>
