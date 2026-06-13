@@ -125,9 +125,15 @@ function AIMentorPage() {
 
   async function handleDeleteConversation(conversationId) {
     if (!conversationId) {
-      handleNewChat();
-      return;
-    }
+  setConversations((prev) => prev.filter((c) => c.id !== null));
+
+  setActiveConversationId((prevActiveId) =>
+    prevActiveId === null ? null : prevActiveId
+  );
+
+  toast.success("Conversation removed");
+  return;
+}
 
     try {
       await aiService.deleteChat(conversationId);
