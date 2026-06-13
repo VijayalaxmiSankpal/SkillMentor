@@ -65,7 +65,7 @@ const SignupPage = () => {
       await authService.register(name, email, password);
 
       toast.success(
-        "Account created! Please check your email to verify."
+        "Account created successfully! Please login."
       );
 
       navigate("/login");
